@@ -1,9 +1,12 @@
+import { BackgroundColor } from '~/consts/Colors'
+
 const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,
 	parent: 'phaser-container',
 	dom: {
 		createContainer: true
 	},
+	backgroundColor: BackgroundColor,
 	physics: {
 		default: 'arcade',
 		arcade: {
