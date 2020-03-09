@@ -3,7 +3,10 @@ import Phaser from 'phaser'
 import TextureKeys from '~/consts/TextureKeys'
 
 import '~/game/Shooter'
-import '~/game/Ball'
+import '~/game/BallPool'
+// import '~/game/Ball'
+
+const DPR = window.devicePixelRatio
 
 export default class Game extends Phaser.Scene
 {
@@ -17,9 +20,11 @@ export default class Game extends Phaser.Scene
 		this.physics.world.setBounds(0, 0, width, height)
 		this.physics.world.setBoundsCollision(true, true, false, false)
 
-		this.shooter = this.add.shooter(width * 0.5, height, '')
+		this.shooter = this.add.shooter(width * 0.5, height + (30 * DPR), '')
+		const pool = this.add.ballPool(TextureKeys.Virus)
 
-		this.shooter.attachBall(this.add.ball(0, 0, TextureKeys.Virus))
+		this.shooter.setBallPool(pool)
+		this.shooter.attachBall()
 	}
 
 	update(t, dt)

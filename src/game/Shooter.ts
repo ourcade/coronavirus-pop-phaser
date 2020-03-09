@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 
-import { OrangeColor, LightColor } from '~/consts/Colors'
+import { OrangeColor } from '~/consts/Colors'
 
 const DPR = window.devicePixelRatio
 const RADIUS = 100 * DPR
@@ -9,7 +9,8 @@ declare global
 {
 	interface IShooter extends Phaser.GameObjects.Container
 	{
-		attachBall(ball: IBall)
+		setBallPool(pool: IBallPool)
+		attachBall(ball?: IBall)
 		update(dt: number)
 	}
 }
@@ -17,6 +18,7 @@ declare global
 export default class Shooter extends Phaser.GameObjects.Container implements IShooter
 {
 	private ball?: IBall
+	private ballPool?: IBallPool
 
 	constructor(scene: Phaser.Scene, x: number, y: number, texture: string)
 	{
@@ -38,11 +40,21 @@ export default class Shooter extends Phaser.GameObjects.Container implements ISh
 		super.preDestroy()
 	}
 
-	attachBall(ball: IBall)
+	setBallPool(pool: IBallPool)
 	{
-		if (!ball)
+		this.ballPool = pool
+	}
+
+	attachBall(ball?: IBall)
+	{
+		if (!this.ballPool)
 		{
 			return
+		}
+
+		if (!ball)
+		{
+			ball = this.ballPool.spawn(0, 0)
 		}
 
 		this.ball = ball

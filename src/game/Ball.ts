@@ -1,18 +1,59 @@
 import Phaser from 'phaser'
+import BallColor from './BallColor'
+
+const ALL_COLORS = [
+	BallColor.Red,
+	BallColor.Blue,
+	BallColor.Green,
+	BallColor.Yellow
+]
 
 declare global
 {
 	interface IBall extends Phaser.Physics.Arcade.Sprite
 	{
+		setRandomColor(): IBall
+		setColor(color: BallColor): IBall
+		useCircleCollider(): IBall
 		launch(direction: Phaser.Math.Vector2): void
 	}
 }
 
 export default class Ball extends Phaser.Physics.Arcade.Sprite implements IBall
 {
+	private _color = BallColor.Red
+
+	get color()
+	{
+		return this._color
+	}
+
 	constructor(scene: Phaser.Scene, x: number, y: number, texture: string, frame: string = '')
 	{
 		super(scene, x, y, texture, frame)
+
+		this.setRandomColor()
+	}
+
+	setRandomColor()
+	{
+		const r = Phaser.Math.Between(0, ALL_COLORS.length - 1)
+		return this.setColor(ALL_COLORS[r])
+	}
+
+	setColor(color: BallColor)
+	{
+		this._color = color
+		this.tint = color
+
+		return this
+	}
+
+	useCircleCollider()
+	{
+		this.setCircle(this.width * 0.5)
+
+		return this
 	}
 
 	launch(direction: Phaser.Math.Vector2, speed = 900)
