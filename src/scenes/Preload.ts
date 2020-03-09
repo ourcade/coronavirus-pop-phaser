@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 
+import TextureKeys from '~/consts/TextureKeys'
 import GameEvents from '~/consts/GameEvents'
-
 import WebFontFile from '~/ui/WebFontFile'
 
 export default class Preload extends Phaser.Scene
@@ -14,6 +14,8 @@ export default class Preload extends Phaser.Scene
 		])
 
 		this.load.addFile(fonts)
+
+		this.load.image(TextureKeys.Virus, 'assets/game/coronavirus.png')
 	}
 
 	create()

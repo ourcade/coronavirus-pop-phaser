@@ -1,8 +1,9 @@
 import { BackgroundColor } from '~/consts/Colors'
+import ElementKeys from '~/consts/ElementKeys'
 
 const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,
-	parent: 'phaser-container',
+	parent: ElementKeys.ContainerId,
 	dom: {
 		createContainer: true
 	},
@@ -10,7 +11,8 @@ const config: Phaser.Types.Core.GameConfig = {
 	physics: {
 		default: 'arcade',
 		arcade: {
-			gravity: { y: 200 }
+			gravity: { y: 0 },
+			debug: true
 		}
 	},
 	scale: {

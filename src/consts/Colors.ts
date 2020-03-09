@@ -1,10 +1,12 @@
-const PrimaryColor = '#F84031'
-const SecondaryColor = '#FEDD74'
-const BackgroundColor = '#3B2C54'
+const PrimaryColor = 0xF84031
+const SecondaryColor = 0xFEDD74
+const BackgroundColor = 0x3B2C54
 
-const GreenColor = '#196840'
-const OrangeColor = '#EF7D3C'
-const DarkColor = '#1c1c1c'
+const GreenColor = 0x196840
+const OrangeColor = 0xEF7D3C
+
+const DarkColor = 0x1c1c1c
+const LightColor = 0xe0e0e0
 
 export {
 	PrimaryColor,
@@ -14,5 +16,6 @@ export {
 	GreenColor,
 	OrangeColor,
 
-	DarkColor
+	DarkColor,
+	LightColor
 }
