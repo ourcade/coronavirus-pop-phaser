@@ -12,6 +12,8 @@ declare global
 {
 	interface IBall extends Phaser.Physics.Arcade.Sprite
 	{
+		readonly color: BallColor
+
 		setRandomColor(): IBall
 		setColor(color: BallColor): IBall
 		useCircleCollider(): IBall
@@ -51,12 +53,15 @@ export default class Ball extends Phaser.Physics.Arcade.Sprite implements IBall
 
 	useCircleCollider()
 	{
-		this.setCircle(this.width * 0.5)
+		const radius = this.width * 0.5
+		const usedRadius = radius * 0.7
+		const diff = radius - usedRadius
+		this.setCircle(usedRadius, diff, diff)
 
 		return this
 	}
 
-	launch(direction: Phaser.Math.Vector2, speed = 900)
+	launch(direction: Phaser.Math.Vector2, speed = 1000) // 1500)
 	{
 		this.setCollideWorldBounds(true, 1, 1)
 

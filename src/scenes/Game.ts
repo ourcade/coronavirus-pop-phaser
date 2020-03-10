@@ -41,9 +41,32 @@ export default class Game extends Phaser.Scene
 
 	private handleBallHitGrid(ball: Phaser.GameObjects.GameObject, gridBall: Phaser.GameObjects.GameObject)
 	{
-		this.shooter?.returnBall(ball as IBall)
+		const b = ball as IBall
+		const bx = b.x
+		const by = b.y
+		const color = b.color
+
+		const gb = gridBall as IBall
+		const gx = gb.x
+		const gy = gb.y
+
+		// determine direction ball traveling when it hit the grid
+		// then negate it to have opposite direction
+		const direction = new Phaser.Math.Vector2(gx - bx, gy - by)
+			.normalize()
+			.negate()
+
+		// get where the ball would be at contact with grid
+		const x = gx + (direction.x * gb.width)
+		const y = gy + (direction.y * gb.width)
+
+		this.shooter?.returnBall(b)
 		this.shooter?.attachBall()
-		console.dir(gridBall)
+
+		this.grid?.attachBall(x, y, color, gx, gy)
+
+		// TODO: add to ball grid at cell nearest x, y
+		// TODO: evaluate matches
 	}
 
 	update(t, dt)
