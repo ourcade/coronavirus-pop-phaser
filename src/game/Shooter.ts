@@ -11,6 +11,7 @@ declare global
 	{
 		setBallPool(pool: IBallPool)
 		attachBall(ball?: IBall)
+		returnBall(ball: IBall)
 		update(dt: number)
 	}
 }
@@ -65,6 +66,11 @@ export default class Shooter extends Phaser.GameObjects.Container implements ISh
 		this.ball.y = this.y - RADIUS - (this.ball.height * 0.5) - (5 * DPR)
 	}
 
+	returnBall(ball: IBall)
+	{
+		this.ballPool?.despawn(ball)
+	}
+
 	update(dt: number)
 	{
 		if (!this.ball)
@@ -97,32 +103,10 @@ export default class Shooter extends Phaser.GameObjects.Container implements ISh
 
 	private handlePointerDown()
 	{
-		console.dir('down')
 	}
 
 	private handlePointerUp()
 	{
-		console.dir('up')
-		// if (!this.ball)
-		// {
-		// 	return
-		// }
-		
-		// const pointer = this.scene.input.activePointer
-		// const dx = pointer.x - this.x
-		// const dy = pointer.y - this.y
-
-		// const x = this.ball.x
-		// const y = this.ball.y
-
-		// const ball = this.scene.add.ball(x, y, 'virus')
-
-		// const vec = new Phaser.Math.Vector2(dx, dy)
-		// vec.normalize()
-		// ball.setVelocity(vec.x * 100, vec.y * 100)
-
-		// this.ball.destroy(true)
-
 		if (!this.ball)
 		{
 			return

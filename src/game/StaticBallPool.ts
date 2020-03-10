@@ -3,14 +3,14 @@ import Ball from './Ball'
 
 declare global
 {
-	interface IBallPool extends Phaser.Physics.Arcade.Group
+	interface IStaticBallPool extends Phaser.Physics.Arcade.StaticGroup
 	{
 		spawn(x: number, y: number): IBall
 		despawn(ball: IBall)
 	}
 }
 
-export default class BallPool extends Phaser.Physics.Arcade.Group implements IBallPool
+export default class StaticBallPool extends Phaser.Physics.Arcade.StaticGroup implements IStaticBallPool
 {
 	private texture: string
 
@@ -23,7 +23,7 @@ export default class BallPool extends Phaser.Physics.Arcade.Group implements IBa
 			frame: 0,
 			active: false,
 			visible: false,
-			frameQuantity: 4
+			frameQuantity: 30
 		}
 
 		super(world, scene, Object.assign(defaults, config))
@@ -68,9 +68,9 @@ export default class BallPool extends Phaser.Physics.Arcade.Group implements IBa
 	}
 }
 
-Phaser.GameObjects.GameObjectFactory.register('ballPool', function (texture: string, config: Phaser.Types.Physics.Arcade.PhysicsGroupConfig | Phaser.Types.GameObjects.Group.GroupCreateConfig = {}) {
+Phaser.GameObjects.GameObjectFactory.register('staticBallPool', function (texture: string, config: Phaser.Types.Physics.Arcade.PhysicsGroupConfig | Phaser.Types.GameObjects.Group.GroupCreateConfig = {}) {
 	// @ts-ignore
-	const pool = new BallPool(this.scene.physics.world, this.scene, texture, config)
+	const pool = new StaticBallPool(this.scene.physics.world, this.scene, texture, config)
 
 	// @ts-ignore
 	this.updateList.add(pool)
