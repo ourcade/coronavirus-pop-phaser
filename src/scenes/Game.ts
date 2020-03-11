@@ -46,6 +46,11 @@ export default class Game extends Phaser.Scene
 		const b = ball as IBall
 		const gb = gridBall as IBall
 
+		if (!b.active || !gb.active)
+		{
+			return false
+		}
+
 		const distanceSq = Phaser.Math.Distance.Squared(b.x, b.y, gb.x, gb.y)
 		const minDistance = b.width * 0.9
 		const mdSq = minDistance * minDistance

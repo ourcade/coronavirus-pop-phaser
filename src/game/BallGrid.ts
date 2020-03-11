@@ -6,6 +6,14 @@ import BallLayoutData, {
 
 import BallColor from './BallColor'
 
+interface IGridPosition
+{
+	row: number
+	col: number
+}
+
+type IBallOrNone = IBall | undefined
+
 export default class BallGrid
 {
 	private scene: Phaser.Scene
@@ -15,7 +23,7 @@ export default class BallGrid
 
 	private size: Phaser.Structs.Size
 
-	private grid: IBall[][] = []
+	private grid: IBallOrNone[][] = []
 
 	constructor(scene: Phaser.Scene, pool: IStaticBallPool)
 	{
@@ -118,35 +126,17 @@ export default class BallGrid
 
 		this.insertAt(bRow, bCol, newBall)
 
-		// https://github.com/photonstorm/phaser/blob/v3.22.0/src/math/easing/EaseMap.js
-		const timeline = this.scene.tweens.createTimeline()
-		timeline.add({
-			targets: newBall,
-			y: ty - 5,
-			duration: 50
-		})
+		const matches = this.findMatchesAt(bRow, bCol, color)
+		// minimum 3 matches required
+		if (matches.length < 3)
+		{
+			this.animateAttachBounceAt(bRow, bCol, tx, ty, newBall)
+			return
+		}
 
-		timeline.add({
-			targets: newBall,
-			x: tx,
-			duration: 100,
-			offset: 0
-		})
-
-		timeline.add({
-			targets: newBall,
-			y: ty,
-			duration: 50,
-			ease: 'Back.easeOut',
-			onComplete: () => {
-				const body = newBall.body as Phaser.Physics.Arcade.StaticBody
-				body.updateFromGameObject()
-			}
-		})
-
-		timeline.play()
-
-		this.jiggleNeighbors(bRow, bCol)
+		newBall.x = tx
+		newBall.y = ty
+		this.destroyMatches(matches, color)
 	}
 
 	generate()
@@ -168,7 +158,7 @@ export default class BallGrid
 		data.forEach((row, idx) => {
 			const count = row.length
 
-			const gridRow: IBall[] = []
+			const gridRow: IBallOrNone[] = []
 			this.grid.unshift(gridRow)
 			
 			if (count <= 0)
@@ -184,7 +174,6 @@ export default class BallGrid
 			if (isEven)
 			{
 				x += radius
-				// @ts-ignore
 				// to handle the offset
 				gridRow.push(undefined)
 			}
@@ -219,7 +208,6 @@ export default class BallGrid
 
 			if (!isEven)
 			{
-				// @ts-ignore
 				// pad end with space for offset
 				gridRow.push(undefined)
 			}
@@ -249,6 +237,59 @@ export default class BallGrid
 		}
 
 		return this
+	}
+
+	private destroyMatches(matches: IGridPosition[], color: BallColor)
+	{
+		const size = matches.length
+		for (let i = 0; i < size; ++i)
+		{
+			const { row, col } = matches[i]
+			const ball = this.getAt(row, col)
+
+			if (!ball)
+			{
+				// should never be the case..
+				console.warn(`detroyMatches: match not found...`)
+				continue
+			}
+
+			this.grid[row][col] = undefined
+			this.pool.despawn(ball)
+		}
+	}
+
+	private animateAttachBounceAt(row: number, col: number, tx: number, ty: number, newBall: IBall)
+	{
+		// https://github.com/photonstorm/phaser/blob/v3.22.0/src/math/easing/EaseMap.js
+		const timeline = this.scene.tweens.createTimeline()
+		timeline.add({
+			targets: newBall,
+			y: ty - 5,
+			duration: 50
+		})
+
+		timeline.add({
+			targets: newBall,
+			x: tx,
+			duration: 100,
+			offset: 0
+		})
+
+		timeline.add({
+			targets: newBall,
+			y: ty,
+			duration: 50,
+			ease: 'Back.easeOut',
+			onComplete: () => {
+				const body = newBall.body as Phaser.Physics.Arcade.StaticBody
+				body.updateFromGameObject()
+			}
+		})
+
+		timeline.play()
+
+		this.jiggleNeighbors(row, col)
 	}
 
 	private findRowAndColumns(ball: IBall)
@@ -302,6 +343,11 @@ export default class BallGrid
 
 	private getAt(row: number, col: number)
 	{
+		if (row < 0)
+		{
+			return null
+		}
+
 		if (row > this.grid.length - 1)
 		{
 			return null
@@ -309,6 +355,112 @@ export default class BallGrid
 
 		const rowList = this.grid[row]
 		return rowList[col]
+	}
+
+	private findMatchesAt(row: number, col: number, color: BallColor, found: Set<IBall> = new Set())
+	{
+		const isEven = row % 2 === 0
+		const adjacentMatches: IGridPosition[] = []
+
+		// top left
+		if (isEven)
+		{
+			const tl = this.getAt(row - 1, col - 1)
+			if (tl && tl.color === color && !found.has(tl))
+			{
+				adjacentMatches.push({
+					row: row - 1,
+					col: col - 1
+				})
+				found.add(tl)
+			}
+		}
+
+		// top
+		const t = this.getAt(row - 1, col)
+		if (t && t.color === color && !found.has(t))
+		{
+			adjacentMatches.push({
+				row: row - 1,
+				col
+			})
+			found.add(t)
+		}
+
+		// top right
+		const tr = this.getAt(row - 1, col + 1)
+		if (tr && tr.color === color && !found.has(tr))
+		{
+			adjacentMatches.push({
+				row: row - 1,
+				col: col + 1
+			})
+			found.add(tr)
+		}
+
+		// right
+		const r = this.getAt(row, col + 1)
+		if (r && r.color === color && !found.has(r))
+		{
+			adjacentMatches.push({
+				row,
+				col: col + 1
+			})
+			found.add(r)
+		}
+
+		// bottom right
+		const br = this.getAt(row + 1, col + 1)
+		if (br && br.color === color && !found.has(br))
+		{
+			adjacentMatches.push({
+				row: row + 1,
+				col: col + 1
+			})
+			found.add(br)
+		}
+
+		// bottom
+		const b = this.getAt(row + 1, col)
+		if (b && b.color === color && !found.has(b))
+		{
+			adjacentMatches.push({
+				row: row + 1,
+				col
+			})
+			found.add(b)
+		}
+
+		// bottom left
+		if (isEven)
+		{
+			const bl = this.getAt(row + 1, col - 1)
+			if (bl && bl.color === color && !found.has(bl))
+			{
+				adjacentMatches.push({
+					row: row + 1,
+					col: col - 1
+				})
+				found.add(bl)
+			}
+		}
+
+		// left
+		const l = this.getAt(row, col - 1)
+		if (l && l.color === color && !found.has(l))
+		{
+			adjacentMatches.push({
+				row,
+				col: col - 1
+			})
+			found.add(l)
+		}
+
+		adjacentMatches.forEach(pos => {
+			this.findMatchesAt(pos.row, pos.col, color, found).forEach(obj => adjacentMatches.push(obj))
+		})
+
+		return adjacentMatches
 	}
 
 	private jiggleNeighbors(sourceRow: number, sourceCol: number)
