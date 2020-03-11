@@ -14,6 +14,11 @@ interface IGridPosition
 
 type IBallOrNone = IBall | undefined
 
+class RowList extends Array<IBallOrNone>
+{
+	isStaggered = false
+}
+
 export default class BallGrid
 {
 	private scene: Phaser.Scene
@@ -113,8 +118,8 @@ export default class BallGrid
 		}
 		else
 		{
-			const isEven = bRow % 2 === 0
-			if (isEven)
+			const isStaggered = this.isRowStaggered(bRow)
+			if (isStaggered)
 			{
 				bCol = tx < cellX ? col : col + 1
 			}
@@ -168,7 +173,6 @@ export default class BallGrid
 			return this
 		}
 
-		const data = this.layoutData.getRandomData()
 		const middle = this.scene.scale.width * 0.5
 		let y = 0
 		let x = middle
@@ -177,23 +181,25 @@ export default class BallGrid
 		const radius = width * 0.5
 		const verticalInterval = width * 0.8
 
-		data.forEach((row, idx) => {
+		for (let i = 0; i < 5; ++i)
+		{
+			const row = this.layoutData.getNextRow()
 			const count = row.length
 
-			const gridRow: IBallOrNone[] = []
+			const gridRow = new RowList()
 			this.grid.unshift(gridRow)
 			
 			if (count <= 0)
 			{
 				y -= verticalInterval
-				return
+				continue
 			}
 
 			const halfCount = count * 0.5
 			x = middle - (halfCount * width) + (radius * 0.5)
 
-			const isEven = idx % 2 === 0
-			if (isEven)
+			gridRow.isStaggered = i % 2 === 0
+			if (gridRow.isStaggered)
 			{
 				x += radius
 				// to handle the offset
@@ -230,14 +236,14 @@ export default class BallGrid
 				x += width
 			})
 
-			if (!isEven)
+			if (!gridRow.isStaggered)
 			{
 				// pad end with space for offset
 				gridRow.push(undefined)
 			}
 
 			y -= verticalInterval
-		})
+		}
 
 		return this
 	}
@@ -384,7 +390,10 @@ export default class BallGrid
 			const count = row - (this.grid.length - 1)
 			for (let i = 0; i < count; ++i)
 			{
-				this.grid.push([])
+				const rowList = new RowList()
+				const prevRow = this.grid[row + i - 1] as RowList
+				rowList.isStaggered = !prevRow.isStaggered
+				this.grid.push(rowList)
 			}
 		}
 
@@ -467,11 +476,11 @@ export default class BallGrid
 	private findMatchesAt(row: number, col: number, color: BallColor, found: Set<IBall> = new Set())
 	{
 		// breadth-first search method
-		const isEven = row % 2 === 0
+		const isStaggered = this.isRowStaggered(row)
 		const adjacentMatches: IGridPosition[] = []
 
 		// top left
-		if (isEven)
+		if (isStaggered)
 		{
 			const tl = this.getAt(row - 1, col - 1)
 			if (tl && colorIsMatch(tl.color, color) && !found.has(tl))
@@ -496,7 +505,7 @@ export default class BallGrid
 		}
 
 		// top right
-		if (!isEven)
+		if (!isStaggered)
 		{
 			const tr = this.getAt(row - 1, col + 1)
 			if (tr && colorIsMatch(tr.color, color) && !found.has(tr))
@@ -521,7 +530,7 @@ export default class BallGrid
 		}
 
 		// bottom right
-		if (!isEven)
+		if (!isStaggered)
 		{
 			const br = this.getAt(row + 1, col + 1)
 			if (br && colorIsMatch(br.color, color) && !found.has(br))
@@ -546,7 +555,7 @@ export default class BallGrid
 		}
 
 		// bottom left
-		if (isEven)
+		if (isStaggered)
 		{
 			const bl = this.getAt(row + 1, col - 1)
 			if (bl && colorIsMatch(bl.color, color) && !found.has(bl))
@@ -665,5 +674,19 @@ export default class BallGrid
 		}
 
 		return positions
+	}
+
+	private isRowStaggered(row: number)
+	{
+		if (row >= this.grid.length - 1)
+		{
+			// if asking about a row that has not been created yet
+			// check row above and invert
+			const rowList = this.grid[row - 1] as RowList	
+			return !rowList.isStaggered
+		}
+
+		const rowList = this.grid[row] as RowList
+		return rowList.isStaggered
 	}
 }

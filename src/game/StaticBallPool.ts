@@ -55,6 +55,9 @@ export default class StaticBallPool extends Phaser.Physics.Arcade.StaticGroup im
 			ball.setRandomColor()
 		}
 
+		const body = ball.body as Phaser.Physics.Arcade.StaticBody
+		body.updateFromGameObject()
+
 		return ball
 	}
 

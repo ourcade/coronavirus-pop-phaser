@@ -9,6 +9,17 @@ const AllColors = [
 
 export default class BallLayoutData
 {
+
+	getNextRow()
+	{
+		const ret: string[] = []
+		for (let i = 0; i < 6; ++i)
+		{
+			ret.push(this.getRandomColor())
+		}
+		return ret
+	}
+
 	// TODO: select from a bunch of different kinds
 	getRandomData()
 	{
@@ -19,21 +30,13 @@ export default class BallLayoutData
 		// 		[Yel,	Yel,	Yel,	Yel,	Yel,	Yel],
 		// 	[Red, 	Blu, 	Gre, 	Yel, 	Red, 	Blu]
 		// ].reverse()
-		return this.generateRandom().reverse()
-	}
-
-	private generateRandom()
-	{
-		const ret: string[][] = []
-		for (let i = 0; i < 5; ++i)
-		{
-			ret[i] = []
-			for (let j = 0; j < 6; ++j)
-			{
-				ret[i][j] = this.getRandomColor()
-			}
-		}
-		return ret
+		return [
+			// this.getNextRow(),
+			// this.getNextRow(),
+			this.getNextRow(),
+			this.getNextRow(),
+			this.getNextRow()
+		].reverse()
 	}
 
 	private getRandomColor()
