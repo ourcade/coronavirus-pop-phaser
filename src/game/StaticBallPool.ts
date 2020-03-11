@@ -64,6 +64,7 @@ export default class StaticBallPool extends Phaser.Physics.Arcade.StaticGroup im
 
 		this.world.remove(ball.body)
 
+		ball.alpha = 1
 		ball.body.reset(0, 0)
 	}
 }

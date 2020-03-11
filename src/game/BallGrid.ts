@@ -4,7 +4,7 @@ import BallLayoutData, {
 	Red, Gre, Blu, Yel
 } from './BallLayoutData'
 
-import BallColor from './BallColor'
+import BallColor, { colorIsMatch } from './BallColor'
 
 interface IGridPosition
 {
@@ -136,7 +136,15 @@ export default class BallGrid
 
 		newBall.x = tx
 		newBall.y = ty
-		this.destroyMatches(matches, color)
+		this.destroyMatches(matches)
+
+		const orphans = this.findOrphanedBalls()
+		if (orphans.length <= 0)
+		{
+			return
+		}
+
+		this.animateOrphans(orphans)
 	}
 
 	generate()
@@ -239,7 +247,7 @@ export default class BallGrid
 		return this
 	}
 
-	private destroyMatches(matches: IGridPosition[], color: BallColor)
+	private destroyMatches(matches: IGridPosition[])
 	{
 		const size = matches.length
 		for (let i = 0; i < size; ++i)
@@ -257,6 +265,42 @@ export default class BallGrid
 			this.grid[row][col] = undefined
 			this.pool.despawn(ball)
 		}
+	}
+
+	private animateOrphans(orphanPositions: IGridPosition[])
+	{
+		const orphans = orphanPositions.map(({ row, col }) => {
+			const ball = this.getAt(row, col)
+			if (ball)
+			{
+				this.scene.physics.world.remove(ball.body)
+			}
+			return ball
+		})
+		// filter out any that are undefined or null
+		.filter(n => n) as IBall[]
+
+		// move down and fade out
+		const timeline = this.scene.tweens.createTimeline()
+
+		const duration = 700
+
+		orphans.forEach(orphan => {
+			timeline.add({
+				targets: orphan,
+				y: orphan.y + 1000,
+				alpha: 0,
+				offset: 0,
+				duration
+			})
+		})
+
+		timeline.play()
+
+		this.scene.time.delayedCall(duration, () => {
+			console.log('complete')
+			this.destroyMatches(orphanPositions)
+		})
 	}
 
 	private animateAttachBounceAt(row: number, col: number, tx: number, ty: number, newBall: IBall)
@@ -333,7 +377,6 @@ export default class BallGrid
 		{
 			if (rowList.length <= i)
 			{
-				// @ts-ignore
 				rowList[i] = undefined
 			}
 		}
@@ -357,8 +400,57 @@ export default class BallGrid
 		return rowList[col]
 	}
 
+	private findOrphanedBalls()
+	{
+		// find all connected balls starting from the top row
+		const connected = new Set<IBall>()
+		const rootPositions = this.grid[0]
+			.map((n, idx) => { 
+				if (!n)
+				{
+					return undefined
+				}
+				connected.add(n)
+				return { row: 0, col: idx }
+			})
+			.filter(n => n) as IGridPosition[]
+
+		rootPositions.forEach(({ row, col }) => {
+			this.findMatchesAt(row, col, BallColor.Any, connected)
+		})
+
+		// any balls that are NOT in the connected set are orphaned
+		// ignore the root row at index 0; they can never be "orphaned"
+		const orphans: IGridPosition[] = []
+		const count = this.grid.length
+		for (let row = 1; row < count; ++row)
+		{
+			const list = this.grid[row]
+			for (let col = 0; col < list.length; ++col)
+			{
+				const ball = list[col]
+				if (!ball)
+				{
+					continue
+				}
+
+				if (connected.has(ball))
+				{
+					continue
+				}
+
+				orphans.push({
+					row, col
+				})
+			}
+		}
+
+		return orphans
+	}
+
 	private findMatchesAt(row: number, col: number, color: BallColor, found: Set<IBall> = new Set())
 	{
+		// breadth-first search method
 		const isEven = row % 2 === 0
 		const adjacentMatches: IGridPosition[] = []
 
@@ -366,7 +458,7 @@ export default class BallGrid
 		if (isEven)
 		{
 			const tl = this.getAt(row - 1, col - 1)
-			if (tl && tl.color === color && !found.has(tl))
+			if (tl && colorIsMatch(tl.color, color) && !found.has(tl))
 			{
 				adjacentMatches.push({
 					row: row - 1,
@@ -378,7 +470,7 @@ export default class BallGrid
 
 		// top
 		const t = this.getAt(row - 1, col)
-		if (t && t.color === color && !found.has(t))
+		if (t && colorIsMatch(t.color, color) && !found.has(t))
 		{
 			adjacentMatches.push({
 				row: row - 1,
@@ -389,7 +481,7 @@ export default class BallGrid
 
 		// top right
 		const tr = this.getAt(row - 1, col + 1)
-		if (tr && tr.color === color && !found.has(tr))
+		if (tr && colorIsMatch(tr.color, color) && !found.has(tr))
 		{
 			adjacentMatches.push({
 				row: row - 1,
@@ -400,7 +492,7 @@ export default class BallGrid
 
 		// right
 		const r = this.getAt(row, col + 1)
-		if (r && r.color === color && !found.has(r))
+		if (r && colorIsMatch(r.color, color) && !found.has(r))
 		{
 			adjacentMatches.push({
 				row,
@@ -411,7 +503,7 @@ export default class BallGrid
 
 		// bottom right
 		const br = this.getAt(row + 1, col + 1)
-		if (br && br.color === color && !found.has(br))
+		if (br && colorIsMatch(br.color, color) && !found.has(br))
 		{
 			adjacentMatches.push({
 				row: row + 1,
@@ -422,7 +514,7 @@ export default class BallGrid
 
 		// bottom
 		const b = this.getAt(row + 1, col)
-		if (b && b.color === color && !found.has(b))
+		if (b && colorIsMatch(b.color, color) && !found.has(b))
 		{
 			adjacentMatches.push({
 				row: row + 1,
@@ -435,7 +527,7 @@ export default class BallGrid
 		if (isEven)
 		{
 			const bl = this.getAt(row + 1, col - 1)
-			if (bl && bl.color === color && !found.has(bl))
+			if (bl && colorIsMatch(bl.color, color) && !found.has(bl))
 			{
 				adjacentMatches.push({
 					row: row + 1,
@@ -447,7 +539,7 @@ export default class BallGrid
 
 		// left
 		const l = this.getAt(row, col - 1)
-		if (l && l.color === color && !found.has(l))
+		if (l && colorIsMatch(l.color, color) && !found.has(l))
 		{
 			adjacentMatches.push({
 				row,
