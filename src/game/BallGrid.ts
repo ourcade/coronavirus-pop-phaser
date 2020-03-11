@@ -297,8 +297,8 @@ export default class BallGrid
 
 		timeline.play()
 
-		this.scene.time.delayedCall(duration, () => {
-			console.log('complete')
+		// NOTE: the onComplete callback doesn't seem to work
+		this.scene.time.delayedCall(duration + 100, () => {
 			this.destroyMatches(orphanPositions)
 		})
 	}
