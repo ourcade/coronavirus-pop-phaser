@@ -34,9 +34,23 @@ export default class Game extends Phaser.Scene
 		this.grid = new BallGrid(this, staticBallPool)
 		this.grid.setLayoutData(new BallLayoutData())
 			.generate()
-			.moveDown(5)
+			.moveDown(4)
 
-		this.physics.add.collider(ballPool, staticBallPool, this.handleBallHitGrid, undefined, this)
+		this.physics.add.collider(ballPool, staticBallPool, this.handleBallHitGrid, this.processBallHitGrid, this)
+	}
+
+	private processBallHitGrid(ball: Phaser.GameObjects.GameObject, gridBall: Phaser.GameObjects.GameObject)
+	{
+		// only accept collision if distance is close enough
+		// gives a better feel for tight shots
+		const b = ball as IBall
+		const gb = gridBall as IBall
+
+		const distanceSq = Phaser.Math.Distance.Squared(b.x, b.y, gb.x, gb.y)
+		const minDistance = b.width * 0.9
+		const mdSq = minDistance * minDistance
+
+		return distanceSq <= mdSq
 	}
 
 	private handleBallHitGrid(ball: Phaser.GameObjects.GameObject, gridBall: Phaser.GameObjects.GameObject)
@@ -46,27 +60,27 @@ export default class Game extends Phaser.Scene
 		const by = b.y
 		const color = b.color
 
+		const vx = b.body.deltaX()
+		const vy = b.body.deltaY()
+
 		const gb = gridBall as IBall
 		const gx = gb.x
 		const gy = gb.y
 
-		// determine direction ball traveling when it hit the grid
+		// determine direction from ball to grid
 		// then negate it to have opposite direction
-		const direction = new Phaser.Math.Vector2(gx - bx, gy - by)
+		const directionToGrid = new Phaser.Math.Vector2(gx - bx, gy - by)
 			.normalize()
 			.negate()
 
 		// get where the ball would be at contact with grid
-		const x = gx + (direction.x * gb.width)
-		const y = gy + (direction.y * gb.width)
+		const x = gx + (directionToGrid.x * gb.width)
+		const y = gy + (directionToGrid.y * gb.width)
 
 		this.shooter?.returnBall(b)
 		this.shooter?.attachBall()
 
-		this.grid?.attachBall(x, y, color, gx, gy)
-
-		// TODO: add to ball grid at cell nearest x, y
-		// TODO: evaluate matches
+		this.grid?.attachBall(x, y, color, gb, vx, vy)
 	}
 
 	update(t, dt)

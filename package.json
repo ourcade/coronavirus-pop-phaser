@@ -18,10 +18,13 @@
 		"parcel-plugin-clean-easy": "^1.0.2",
 		"parcel-plugin-static-files-copy": "^2.2.1",
 		"sass": "^1.26.2",
+		"tslib": "^1.11.1",
 		"typescript": "^3.8.3"
 	},
 	"dependencies": {
+		"@types/lodash": "^4.14.149",
 		"jsx-dom": "^6.4.13",
+		"lodash": "^4.17.15",
 		"phaser": "^3.22.0"
 	},
 	"parcelCleanPaths": [

@@ -54,14 +54,14 @@ export default class Ball extends Phaser.Physics.Arcade.Sprite implements IBall
 	useCircleCollider()
 	{
 		const radius = this.width * 0.5
-		const usedRadius = radius * 0.7
+		const usedRadius = radius * 0.6
 		const diff = radius - usedRadius
 		this.setCircle(usedRadius, diff, diff)
 
 		return this
 	}
 
-	launch(direction: Phaser.Math.Vector2, speed = 1000) // 1500)
+	launch(direction: Phaser.Math.Vector2, speed = 2500)
 	{
 		this.setCollideWorldBounds(true, 1, 1)
 
