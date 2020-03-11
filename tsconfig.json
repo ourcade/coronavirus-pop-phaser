@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"target": "es2016",
-		"module": "es6",
+		"module": "es5",
 		"strict": true,
 		"noImplicitAny": false,
 		"noEmit": true,

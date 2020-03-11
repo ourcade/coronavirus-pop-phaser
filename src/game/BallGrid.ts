@@ -51,7 +51,7 @@ export default class BallGrid
 	 * @param bvx x velocity of ball at collision
 	 * @param bvy y velocity of ball at collision
 	 */
-	attachBall(x: number, y: number, color: BallColor, gridBall: IBall, bvx: number, bvy: number)
+	async attachBall(x: number, y: number, color: BallColor, gridBall: IBall, bvx: number, bvy: number)
 	{
 		const width = this.size.width
 		const radius = width * 0.5
@@ -134,8 +134,22 @@ export default class BallGrid
 			return
 		}
 
-		newBall.x = tx
-		newBall.y = ty
+		await new Promise(resolve => {
+			this.scene.tweens.add({
+				targets: newBall,
+				y: ty,
+				x: tx,
+				duration: 50,
+				ease: 'Back.easeOut',
+				onComplete: function () {
+					resolve()
+				}
+			})
+		})
+
+		const body = newBall.body as Phaser.Physics.Arcade.StaticBody
+		body.updateFromGameObject()
+		
 		this.destroyMatches(matches)
 
 		const orphans = this.findOrphanedBalls()
@@ -187,27 +201,29 @@ export default class BallGrid
 			}
 
 			row.forEach(colorCode => {
-
 				const b = this.pool.spawn(x, y)
 				gridRow.push(b)
 
 				switch (colorCode)
 				{
 					default:
+					case undefined:
+						break
+
 					case Red:
-						b.setColor(BallColor.Red)
+						b!.setColor(BallColor.Red)
 						break
 
 					case Blu:
-						b.setColor(BallColor.Blue)
+						b!.setColor(BallColor.Blue)
 						break
 
 					case Gre:
-						b.setColor(BallColor.Green)
+						b!.setColor(BallColor.Green)
 						break
 
 					case Yel:
-						b.setColor(BallColor.Yellow)
+						b!.setColor(BallColor.Yellow)
 						break
 				}
 
@@ -480,14 +496,17 @@ export default class BallGrid
 		}
 
 		// top right
-		const tr = this.getAt(row - 1, col + 1)
-		if (tr && colorIsMatch(tr.color, color) && !found.has(tr))
+		if (!isEven)
 		{
-			adjacentMatches.push({
-				row: row - 1,
-				col: col + 1
-			})
-			found.add(tr)
+			const tr = this.getAt(row - 1, col + 1)
+			if (tr && colorIsMatch(tr.color, color) && !found.has(tr))
+			{
+				adjacentMatches.push({
+					row: row - 1,
+					col: col + 1
+				})
+				found.add(tr)
+			}
 		}
 
 		// right
@@ -502,14 +521,17 @@ export default class BallGrid
 		}
 
 		// bottom right
-		const br = this.getAt(row + 1, col + 1)
-		if (br && colorIsMatch(br.color, color) && !found.has(br))
+		if (!isEven)
 		{
-			adjacentMatches.push({
-				row: row + 1,
-				col: col + 1
-			})
-			found.add(br)
+			const br = this.getAt(row + 1, col + 1)
+			if (br && colorIsMatch(br.color, color) && !found.has(br))
+			{
+				adjacentMatches.push({
+					row: row + 1,
+					col: col + 1
+				})
+				found.add(br)
+			}
 		}
 
 		// bottom

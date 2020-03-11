@@ -1,3 +1,5 @@
+import 'regenerator-runtime'
+
 import Phaser from 'phaser'
 
 import SceneKeys from './consts/SceneKeys'

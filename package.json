@@ -25,7 +25,8 @@
 		"@types/lodash": "^4.14.149",
 		"jsx-dom": "^6.4.13",
 		"lodash": "^4.17.15",
-		"phaser": "^3.22.0"
+		"phaser": "^3.22.0",
+		"regenerator-runtime": "^0.13.3"
 	},
 	"parcelCleanPaths": [
 		"dist"
