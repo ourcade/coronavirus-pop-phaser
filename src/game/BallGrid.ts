@@ -173,76 +173,17 @@ export default class BallGrid
 			return this
 		}
 
-		const middle = this.scene.scale.width * 0.5
-		let y = 0
-		let x = middle
-
-		const width = this.size.width
-		const radius = width * 0.5
-		const verticalInterval = width * 0.8
-
 		for (let i = 0; i < 5; ++i)
 		{
 			const row = this.layoutData.getNextRow()
 			const count = row.length
 
-			const gridRow = new RowList()
-			this.grid.unshift(gridRow)
-			
 			if (count <= 0)
 			{
-				y -= verticalInterval
 				continue
 			}
 
-			const halfCount = count * 0.5
-			x = middle - (halfCount * width) + (radius * 0.5)
-
-			gridRow.isStaggered = i % 2 === 0
-			if (gridRow.isStaggered)
-			{
-				x += radius
-				// to handle the offset
-				gridRow.push(undefined)
-			}
-
-			row.forEach(colorCode => {
-				const b = this.pool.spawn(x, y)
-				gridRow.push(b)
-
-				switch (colorCode)
-				{
-					default:
-					case undefined:
-						break
-
-					case Red:
-						b!.setColor(BallColor.Red)
-						break
-
-					case Blu:
-						b!.setColor(BallColor.Blue)
-						break
-
-					case Gre:
-						b!.setColor(BallColor.Green)
-						break
-
-					case Yel:
-						b!.setColor(BallColor.Yellow)
-						break
-				}
-
-				x += width
-			})
-
-			if (!gridRow.isStaggered)
-			{
-				// pad end with space for offset
-				gridRow.push(undefined)
-			}
-
-			y -= verticalInterval
+			this.addRowToFront(row)
 		}
 
 		return this
@@ -267,6 +208,81 @@ export default class BallGrid
 		}
 
 		return this
+	}
+
+	private addRowToFront(row: string[])
+	{
+		const middle = this.scene.scale.width * 0.5
+		const width = this.size.width
+		const radius = width * 0.5
+		const verticalInterval = width * 0.8
+
+		const count = row.length
+
+		const gridRow = new RowList()
+		this.grid.unshift(gridRow)
+
+		const halfCount = count * 0.5
+		let x = middle - (halfCount * width) + (radius * 0.5)
+		let y = 0
+
+		if (this.grid.length <= 1)
+		{
+			gridRow.isStaggered = true
+		}
+		else
+		{
+			const rowList = this.grid[1] as RowList
+			gridRow.isStaggered = !rowList.isStaggered
+			const anyItem = rowList.find(n => n)
+			if (anyItem)
+			{
+				y = anyItem.y - verticalInterval
+			}
+		}
+		
+		if (gridRow.isStaggered)
+		{
+			x += radius
+			// to handle the offset
+			gridRow.push(undefined)
+		}
+
+		row.forEach(colorCode => {
+			const b = this.pool.spawn(x, y)
+			gridRow.push(b)
+
+			switch (colorCode)
+			{
+				default:
+				case undefined:
+					break
+
+				case Red:
+					b!.setColor(BallColor.Red)
+					break
+
+				case Blu:
+					b!.setColor(BallColor.Blue)
+					break
+
+				case Gre:
+					b!.setColor(BallColor.Green)
+					break
+
+				case Yel:
+					b!.setColor(BallColor.Yellow)
+					break
+			}
+
+			x += width
+		})
+
+		if (!gridRow.isStaggered)
+		{
+			// pad end with space for offset
+			gridRow.push(undefined)
+		}
 	}
 
 	private destroyMatches(matches: IGridPosition[])
