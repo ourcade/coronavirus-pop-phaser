@@ -5,6 +5,7 @@ import BallLayoutData, {
 } from './BallLayoutData'
 
 import BallColor, { colorIsMatch } from './BallColor'
+import { Subject } from 'rxjs'
 
 interface IGridPosition
 {
@@ -30,6 +31,36 @@ export default class BallGrid
 
 	private grid: IBallOrNone[][] = []
 
+	private ballsDestroyedSubject = new Subject<number>()
+
+	get height()
+	{
+		this.cleanUpEmptyRows()
+		return this.grid.length * this.ballInterval
+	}
+
+	get ballInterval()
+	{
+		return this.size.height * 0.8
+	}
+
+	get bottom()
+	{
+		if (this.grid.length <= 0)
+		{
+			return 0
+		}
+
+		const idx = this.grid.length - 1
+		const ball = this.grid[idx].find(n => n)
+		if (!ball)
+		{
+			return 0
+		}
+
+		return ball.y + ball.radius
+	}
+
 	constructor(scene: Phaser.Scene, pool: IStaticBallPool)
 	{
 		this.scene = scene
@@ -45,6 +76,11 @@ export default class BallGrid
 		this.layoutData = layout
 
 		return this
+	}
+
+	onBallsDestroyed()
+	{
+		return this.ballsDestroyedSubject.asObservable()
 	}
 
 	/**
@@ -75,7 +111,7 @@ export default class BallGrid
 		let tx = dx <= 0 ? cellX - radius : cellX + radius
 
 		// offset by vertical interval
-		const interval = width * 0.8
+		const interval = this.ballInterval
 		const dy = y - cellY
 		let ty = dy >= 0 ? cellY + interval : cellY - interval
 
@@ -139,6 +175,12 @@ export default class BallGrid
 			return
 		}
 
+		// remove them from grid immediately but not visually...
+		// remove visually after animation below
+		// we want to remove from grid immediately so that other
+		// processes that add new rows can run normally
+		const matchedBalls = this.removeFromGrid(matches)
+
 		await new Promise(resolve => {
 			this.scene.tweens.add({
 				targets: newBall,
@@ -155,41 +197,36 @@ export default class BallGrid
 		const body = newBall.body as Phaser.Physics.Arcade.StaticBody
 		body.updateFromGameObject()
 		
-		this.destroyMatches(matches)
+		// remove matched balls
+		matchedBalls.forEach(ball => this.pool.despawn(ball))
 
 		const orphans = this.findOrphanedBalls()
-		if (orphans.length <= 0)
+		if (orphans.length > 0)
 		{
-			return
+			this.animateOrphans(orphans)
 		}
 
-		this.animateOrphans(orphans)
+		this.cleanUpEmptyRows()
+
+		this.ballsDestroyedSubject.next(matches.length + orphans.length)
 	}
 
-	generate()
+	generate(rows = 6)
 	{
 		if (!this.layoutData)
 		{
 			return this
 		}
 
-		for (let i = 0; i < 4; ++i)
+		for (let i = 0; i < rows; ++i)
 		{
-			const row = this.layoutData.getNextRow()
-			const count = row.length
-
-			if (count <= 0)
-			{
-				continue
-			}
-
-			this.addRowToFront(row)
+			this.spawnRow()
 		}
 
 		return this
 	}
 
-	moveDown(rows: number = 1)
+	moveBy(dy: number)
 	{
 		if (this.pool.countActive() === 0)
 		{
@@ -201,7 +238,7 @@ export default class BallGrid
 		for (let i = 0; i < count; ++i)
 		{
 			const b = balls[i] as IBall
-			b.y += (b.height * rows)
+			b.y += dy
 
 			const body = b.body as Phaser.Physics.Arcade.StaticBody
 			body.updateFromGameObject()
@@ -210,12 +247,32 @@ export default class BallGrid
 		return this
 	}
 
+	spawnRow()
+	{
+		if (!this.layoutData)
+		{
+			return -1
+		}
+
+		const row = this.layoutData.getNextRow()
+		const count = row.length
+
+		if (count <= 0)
+		{
+			return 0
+		}
+
+		this.addRowToFront(row)
+
+		return row.length
+	}
+
 	private addRowToFront(row: string[])
 	{
 		const middle = this.scene.scale.width * 0.5
 		const width = this.size.width
 		const radius = width * 0.5
-		const verticalInterval = width * 0.8
+		const verticalInterval = this.ballInterval
 
 		const count = row.length
 
@@ -287,6 +344,13 @@ export default class BallGrid
 
 	private destroyMatches(matches: IGridPosition[])
 	{
+		this.removeFromGrid(matches)
+			.forEach(ball => this.pool.despawn(ball))
+	}
+
+	private removeFromGrid(matches: IGridPosition[])
+	{
+		const balls: IBall[] = []
 		const size = matches.length
 		for (let i = 0; i < size; ++i)
 		{
@@ -301,22 +365,19 @@ export default class BallGrid
 			}
 
 			this.grid[row][col] = undefined
-			this.pool.despawn(ball)
+			balls.push(ball)
 		}
+
+		return balls
 	}
 
 	private animateOrphans(orphanPositions: IGridPosition[])
 	{
-		const orphans = orphanPositions.map(({ row, col }) => {
-			const ball = this.getAt(row, col)
-			if (ball)
-			{
+		const orphans = this.removeFromGrid(orphanPositions)
+			.map(ball => {
 				this.scene.physics.world.remove(ball.body)
-			}
-			return ball
-		})
-		// filter out any that are undefined or null
-		.filter(n => n) as IBall[]
+				return ball
+			})
 
 		// move down and fade out
 		const timeline = this.scene.tweens.createTimeline()
@@ -337,7 +398,7 @@ export default class BallGrid
 
 		// NOTE: the onComplete callback doesn't seem to work
 		this.scene.time.delayedCall(duration + 100, () => {
-			this.destroyMatches(orphanPositions)
+			orphans.forEach(ball => this.pool.despawn(ball))
 		})
 	}
 
@@ -596,8 +657,18 @@ export default class BallGrid
 		}
 
 		adjacentMatches.forEach(pos => {
-			this.findMatchesAt(pos.row, pos.col, color, found).forEach(obj => adjacentMatches.push(obj))
+			this.findMatchesAt(pos.row, pos.col, color, found)
+				.forEach(obj => adjacentMatches.push(obj))
 		})
+
+		const missing = adjacentMatches.find(({ row, col }) => {
+			return !this.getAt(row, col)
+		})
+
+		if (missing)
+		{
+			console.dir(missing)
+		}
 
 		return adjacentMatches
 	}
@@ -704,5 +775,20 @@ export default class BallGrid
 
 		const rowList = this.grid[row] as RowList
 		return rowList.isStaggered
+	}
+
+	private cleanUpEmptyRows()
+	{
+		const size = this.grid.length
+		for (let i = size - 1; i >= 0; --i)
+		{
+			const row = this.grid[i]
+			if (row.find(n => n))
+			{
+				return
+			}
+
+			this.grid.pop()
+		}
 	}
 }

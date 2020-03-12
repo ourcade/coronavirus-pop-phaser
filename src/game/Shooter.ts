@@ -9,6 +9,8 @@ declare global
 {
 	interface IShooter extends Phaser.GameObjects.Container
 	{
+		readonly radius: number
+
 		setBallPool(pool: IBallPool)
 		attachBall(ball?: IBall)
 		returnBall(ball: IBall)
@@ -20,6 +22,11 @@ export default class Shooter extends Phaser.GameObjects.Container implements ISh
 {
 	private ball?: IBall
 	private ballPool?: IBallPool
+
+	get radius()
+	{
+		return RADIUS
+	}
 
 	constructor(scene: Phaser.Scene, x: number, y: number, texture: string)
 	{

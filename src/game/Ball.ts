@@ -13,6 +13,7 @@ declare global
 	interface IBall extends Phaser.Physics.Arcade.Sprite
 	{
 		readonly color: BallColor
+		readonly radius: number
 
 		setRandomColor(): IBall
 		setColor(color: BallColor): IBall
@@ -28,6 +29,11 @@ export default class Ball extends Phaser.Physics.Arcade.Sprite implements IBall
 	get color()
 	{
 		return this._color
+	}
+
+	get radius()
+	{
+		return this.width * 0.5
 	}
 
 	constructor(scene: Phaser.Scene, x: number, y: number, texture: string, frame: string = '')

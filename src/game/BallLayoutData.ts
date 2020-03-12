@@ -9,34 +9,25 @@ const AllColors = [
 
 export default class BallLayoutData
 {
+	private growthModel: IGrowthModel
+
+	constructor(growthModel: IGrowthModel)
+	{
+		this.growthModel = growthModel
+	}
 
 	getNextRow()
 	{
+		const count = this.growthModel.getNext(6)
+
+		// TODO: potentially randomize positions when less than 6 available
+
 		const ret: string[] = []
-		for (let i = 0; i < 6; ++i)
+		for (let i = 0; i < count; ++i)
 		{
 			ret.push(this.getRandomColor())
 		}
 		return ret
-	}
-
-	// TODO: select from a bunch of different kinds
-	getRandomData()
-	{
-		// return [
-		// 	[Red, 	Red, 	Red, 	Red, 	Red, 	Red],
-		// 		[Blu,	Blu, 	Blu, 	Blu, 	Blu, 	Blu],
-		// 	[Gre,	Gre,	Gre,	Gre,	Gre,	Gre],
-		// 		[Yel,	Yel,	Yel,	Yel,	Yel,	Yel],
-		// 	[Red, 	Blu, 	Gre, 	Yel, 	Red, 	Blu]
-		// ].reverse()
-		return [
-			// this.getNextRow(),
-			// this.getNextRow(),
-			this.getNextRow(),
-			this.getNextRow(),
-			this.getNextRow()
-		].reverse()
 	}
 
 	private getRandomColor()

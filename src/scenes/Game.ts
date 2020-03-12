@@ -7,13 +7,26 @@ import '~/game/BallPool'
 import '~/game/StaticBallPool'
 import BallGrid from '~/game/BallGrid'
 import BallLayoutData from '~/game/BallLayoutData'
+import VirusGrowthModel from '~/game/VirusGrowthModel'
+import DescentController from '~/game/DescentController'
 
 const DPR = window.devicePixelRatio
+
+enum GameState
+{
+	Playing,
+	GameOver
+}
 
 export default class Game extends Phaser.Scene
 {
 	private shooter?: IShooter
 	private grid?: BallGrid
+
+	private growthModel = new VirusGrowthModel(100)
+	private descentController?: DescentController
+
+	private state = GameState.Playing
 
 	create()
 	{
@@ -32,11 +45,22 @@ export default class Game extends Phaser.Scene
 		const staticBallPool = this.add.staticBallPool(TextureKeys.Virus)
 
 		this.grid = new BallGrid(this, staticBallPool)
-		this.grid.setLayoutData(new BallLayoutData())
+		this.grid.setLayoutData(new BallLayoutData(this.growthModel))
 			.generate()
-			.moveDown(4)
 
 		this.physics.add.collider(ballPool, staticBallPool, this.handleBallHitGrid, this.processBallHitGrid, this)
+
+		this.descentController = new DescentController(this, this.grid, this.growthModel)
+		this.descentController.setStartingDescent(300)
+
+		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+			this.handleShutdown()	
+		})
+	}
+
+	private handleShutdown()
+	{
+		this.descentController?.destroy()
 	}
 
 	private processBallHitGrid(ball: Phaser.GameObjects.GameObject, gridBall: Phaser.GameObjects.GameObject)
@@ -90,9 +114,27 @@ export default class Game extends Phaser.Scene
 
 	update(t, dt)
 	{
-		if (this.shooter)
+		if (this.state === GameState.GameOver)
 		{
-			this.shooter.update(dt)
+			return
 		}
+
+		if (!this.descentController || !this.shooter)
+		{
+			return
+		}
+
+		this.growthModel.update(dt)
+		this.shooter.update(dt)
+		this.descentController.update(dt)
+
+		const dcy = this.descentController.yPosition
+		if (dcy > this.shooter.y - this.shooter.radius)
+		{
+			// game over
+			this.state = GameState.GameOver
+			console.log('game over')
+		}
+
 	}
 }

@@ -51,9 +51,9 @@ export default class BallPool extends Phaser.Physics.Arcade.Group implements IBa
 			ball.setVisible(true)
 			ball.setActive(true)
 			this.world.add(ball.body)
-
-			ball.setRandomColor()
 		}
+
+		ball.setRandomColor()
 
 		return ball
 	}
