@@ -3,6 +3,10 @@
 
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+## Overview
+
+This is a Bubble Shooter template in Phaser 3 built with TypeScript. Substitute art and narrative with your topic of choice!
+
 ## Getting Started
 
 Clone this repository and run:
