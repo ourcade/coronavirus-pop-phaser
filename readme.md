@@ -9,6 +9,8 @@ This is a Bubble Shooter template in Phaser 3 built with TypeScript. Substitute 
 
 [Learn more about this template here including access to a free email course to learn how to make this from scratch!](https://ourcade.co/templates/coronavirus-bubble-shooter-template)
 
+[Play the demo here.](https://ourcade.github.io/coronavirus-pop-phaser/) *Note that not all game functionality has been implemented yet.*
+
 ## Getting Started
 
 Clone this repository and run:
