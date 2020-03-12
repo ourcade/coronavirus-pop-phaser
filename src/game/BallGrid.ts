@@ -173,7 +173,7 @@ export default class BallGrid
 			return this
 		}
 
-		for (let i = 0; i < 5; ++i)
+		for (let i = 0; i < 4; ++i)
 		{
 			const row = this.layoutData.getNextRow()
 			const count = row.length
