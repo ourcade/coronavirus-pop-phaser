@@ -1,6 +1,7 @@
 enum TextureKeys
 {
-	Virus = 'virus'
+	Virus = 'virus',
+	VirusParticles = 'virus-particles'
 }
 
 export default TextureKeys

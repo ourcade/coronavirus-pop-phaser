@@ -70,8 +70,13 @@ export default class Game extends Phaser.Scene
 			this.handleGameWin()
 		})
 
+		const ballSub = this.grid.onBallWillBeDestroyed().subscribe(ball => {
+			this.handleBallWillBeDestroyed(ball)
+		})
+
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
 			winSub.unsubscribe()
+			ballSub.unsubscribe()
 
 			this.handleShutdown()	
 		})
@@ -86,6 +91,25 @@ export default class Game extends Phaser.Scene
 	private handleGameOver()
 	{
 		this.scene.run(SceneKeys.GameOver)
+	}
+
+	private handleBallWillBeDestroyed(ball: IBall)
+	{
+		const x = ball.x
+		const y = ball.y
+
+		// explosion then go to gameover
+		const particles = this.add.particles(TextureKeys.VirusParticles)
+		particles.setDepth(2000)
+		particles.createEmitter({
+			speed: { min: -200, max: 200 },
+			angle: { min: 0, max: 360 },
+			scale: { start: 0.3, end: 0 },
+			blendMode: Phaser.BlendModes.ADD,
+			tint: ball.color,
+			lifespan: 300
+		})
+		.explode(50, x, y)
 	}
 
 	private handleShutdown()

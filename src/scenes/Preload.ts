@@ -16,6 +16,7 @@ export default class Preload extends Phaser.Scene
 		this.load.addFile(fonts)
 
 		this.load.image(TextureKeys.Virus, 'assets/game/coronavirus.png')
+		this.load.image(TextureKeys.VirusParticles, 'assets/game/light_02.png')
 	}
 
 	create()

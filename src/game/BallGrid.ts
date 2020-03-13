@@ -32,6 +32,7 @@ export default class BallGrid
 	private grid: IBallOrNone[][] = []
 
 	private ballsDestroyedSubject = new Subject<number>()
+	private ballWillBeDestroyed = new Subject<IBall>()
 
 	get height()
 	{
@@ -81,6 +82,11 @@ export default class BallGrid
 	onBallsDestroyed()
 	{
 		return this.ballsDestroyedSubject.asObservable()
+	}
+
+	onBallWillBeDestroyed()
+	{
+		return this.ballWillBeDestroyed.asObservable()
 	}
 
 	/**
@@ -198,7 +204,10 @@ export default class BallGrid
 		body.updateFromGameObject()
 		
 		// remove matched balls
-		matchedBalls.forEach(ball => this.pool.despawn(ball))
+		matchedBalls.forEach(ball => {
+			this.ballWillBeDestroyed.next(ball)
+			this.pool.despawn(ball)
+		})
 
 		const orphans = this.findOrphanedBalls()
 		if (orphans.length > 0)
