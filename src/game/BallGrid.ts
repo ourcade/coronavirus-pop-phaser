@@ -419,14 +419,6 @@ export default class BallGrid
 		})
 
 		timeline.play()
-
-		// NOTE: the onComplete callback doesn't seem to work
-		// this.scene.time.delayedCall(maxDuration + 100, () => {
-		// 	orphans.forEach(ball => {
-		// 		this.ballWillBeDestroyed.next(ball)
-		// 		this.pool.despawn(ball)
-		// 	})
-		// })
 	}
 
 	private animateAttachBounceAt(row: number, col: number, tx: number, ty: number, newBall: IBall)

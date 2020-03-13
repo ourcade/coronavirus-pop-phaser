@@ -2,6 +2,8 @@ import Phaser from 'phaser'
 
 import { OrangeColor } from '~/consts/Colors'
 
+import IShotGuide from '~/types/IShotGuide'
+
 const DPR = window.devicePixelRatio
 const RADIUS = 100 * DPR
 
@@ -12,6 +14,8 @@ declare global
 		readonly radius: number
 
 		setBallPool(pool: IBallPool)
+		setGuide(guide: IShotGuide)
+
 		attachBall(ball?: IBall)
 		returnBall(ball: IBall)
 		update(dt: number)
@@ -22,6 +26,7 @@ export default class Shooter extends Phaser.GameObjects.Container implements ISh
 {
 	private ball?: IBall
 	private ballPool?: IBallPool
+	private shotGuide?: IShotGuide
 
 	get radius()
 	{
@@ -51,6 +56,11 @@ export default class Shooter extends Phaser.GameObjects.Container implements ISh
 	setBallPool(pool: IBallPool)
 	{
 		this.ballPool = pool
+	}
+
+	setGuide(guide: IShotGuide)
+	{
+		this.shotGuide = guide
 	}
 
 	attachBall(ball?: IBall)
@@ -101,11 +111,14 @@ export default class Shooter extends Phaser.GameObjects.Container implements ISh
 		const vec = new Phaser.Math.Vector2(dx, dy)
 		vec.normalize()
 
-		const ballRadius = this.ball.height * 0.5
+		const ballRadius = this.ball.radius
+		const physicsRadius = this.ball.physicsRadius
 		const gap = 5 * DPR
 
 		this.ball.x = this.x + (vec.x * (RADIUS + ballRadius + gap))
 		this.ball.y = this.y + (vec.y * (RADIUS + ballRadius + gap))
+
+		this.shotGuide?.showFrom(this.ball.x, this.ball.y, vec, physicsRadius)
 	}
 
 	private handlePointerDown()
@@ -129,6 +142,8 @@ export default class Shooter extends Phaser.GameObjects.Container implements ISh
 		this.ball.launch(vec)
 
 		this.ball = undefined
+
+		this.shotGuide?.hide()
 	}
 }
 

@@ -14,6 +14,7 @@ declare global
 	{
 		readonly color: BallColor
 		readonly radius: number
+		readonly physicsRadius: number
 
 		setRandomColor(): IBall
 		setColor(color: BallColor): IBall
@@ -34,6 +35,11 @@ export default class Ball extends Phaser.Physics.Arcade.Sprite implements IBall
 	get radius()
 	{
 		return this.width * 0.5
+	}
+
+	get physicsRadius()
+	{
+		return this.radius * 0.6
 	}
 
 	constructor(scene: Phaser.Scene, x: number, y: number, texture: string, frame: string = '')
@@ -59,8 +65,8 @@ export default class Ball extends Phaser.Physics.Arcade.Sprite implements IBall
 
 	useCircleCollider()
 	{
-		const radius = this.width * 0.5
-		const usedRadius = radius * 0.6
+		const radius = this.radius
+		const usedRadius = this.physicsRadius
 		const diff = radius - usedRadius
 		this.setCircle(usedRadius, diff, diff)
 

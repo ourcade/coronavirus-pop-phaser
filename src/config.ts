@@ -14,7 +14,7 @@ const config: Phaser.Types.Core.GameConfig = {
 		default: 'arcade',
 		arcade: {
 			gravity: { y: 0 },
-			debug: true
+			// debug: true
 		}
 	},
 	scale: {
@@ -22,9 +22,6 @@ const config: Phaser.Types.Core.GameConfig = {
 		autoCenter: Phaser.Scale.Center.CENTER_BOTH,
 		width: '100%',
 		height: '100%',
-		// width: 375 * DPR,
-		// height: 667 * DPR
-		// zoom: 1 / DPR
 	}
 }
 

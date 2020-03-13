@@ -10,6 +10,7 @@ import BallLayoutData from '~/game/BallLayoutData'
 import VirusGrowthModel from '~/game/VirusGrowthModel'
 import DescentController from '~/game/DescentController'
 import SceneKeys from '~/consts/SceneKeys'
+import ShotGuide from '~/game/guides/ShotGuide'
 
 const DPR = window.devicePixelRatio
 
@@ -45,6 +46,7 @@ export default class Game extends Phaser.Scene
 		this.physics.world.setBoundsCollision(true, true, false, false)
 
 		this.shooter = this.add.shooter(width * 0.5, height + (30 * DPR), '')
+		this.shooter.setGuide(new ShotGuide(this))
 
 		const ballPool = this.add.ballPool(TextureKeys.Virus)
 		this.shooter.setBallPool(ballPool)
