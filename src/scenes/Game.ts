@@ -9,13 +9,15 @@ import BallGrid from '~/game/BallGrid'
 import BallLayoutData from '~/game/BallLayoutData'
 import VirusGrowthModel from '~/game/VirusGrowthModel'
 import DescentController from '~/game/DescentController'
+import SceneKeys from '~/consts/SceneKeys'
 
 const DPR = window.devicePixelRatio
 
 enum GameState
 {
 	Playing,
-	GameOver
+	GameOver,
+	GameWin
 }
 
 export default class Game extends Phaser.Scene
@@ -23,10 +25,16 @@ export default class Game extends Phaser.Scene
 	private shooter?: IShooter
 	private grid?: BallGrid
 
-	private growthModel = new VirusGrowthModel(100)
+	private growthModel!: IGrowthModel
 	private descentController?: DescentController
 
 	private state = GameState.Playing
+
+	init()
+	{
+		this.state = GameState.Playing
+		this.growthModel = new VirusGrowthModel(100)
+	}
 
 	create()
 	{
@@ -53,9 +61,31 @@ export default class Game extends Phaser.Scene
 		this.descentController = new DescentController(this, this.grid, this.growthModel)
 		this.descentController.setStartingDescent(300)
 
+		const winSub = this.growthModel.onPopulationChanged().subscribe(count => {
+			if (count > 0)
+			{
+				return
+			}
+
+			this.handleGameWin()
+		})
+
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+			winSub.unsubscribe()
+
 			this.handleShutdown()	
 		})
+	}
+
+	private handleGameWin()
+	{
+		// NOTE: this might not be possible...
+		console.log('game win')
+	}
+
+	private handleGameOver()
+	{
+		this.scene.run(SceneKeys.GameOver)
 	}
 
 	private handleShutdown()
@@ -114,7 +144,7 @@ export default class Game extends Phaser.Scene
 
 	update(t, dt)
 	{
-		if (this.state === GameState.GameOver)
+		if (this.state === GameState.GameOver || this.state === GameState.GameWin)
 		{
 			return
 		}
@@ -133,7 +163,7 @@ export default class Game extends Phaser.Scene
 		{
 			// game over
 			this.state = GameState.GameOver
-			console.log('game over')
+			this.handleGameOver()
 		}
 
 	}

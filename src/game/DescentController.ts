@@ -66,7 +66,7 @@ export default class DescentController
 				this.ballGrid.moveBy(this.speed)
 
 				const dy = this.ballGrid.height - this.ballGrid.bottom
-				if (dy < this.ballGrid.ballInterval * 3)
+				if (dy < this.ballGrid.ballInterval * 5)
 				{
 					this.ballGrid.spawnRow()
 				}
@@ -116,7 +116,9 @@ export default class DescentController
 
 	private handleVirusPopulationChanged(count: number)
 	{
-		const s = Math.max(0.3, count / 1000)
-		this.speed = Math.min(0.3, s)
+		const s = Math.max(0.3, Math.log(count * .0004))
+		this.speed = s > 1.5 ? 1.5 : s
+
+		console.dir(this.speed)
 	}
 }

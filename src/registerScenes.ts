@@ -4,6 +4,7 @@ import TitleScreen from './scenes/TitleScreen'
 import Bootstrap from './scenes/Bootstrap'
 import Preload from './scenes/Preload'
 import Game from './scenes/Game'
+import GameOver from './scenes/GameOver'
 
 const registerScenes = (game: Phaser.Game) => {
 	const scene = game.scene
@@ -11,6 +12,7 @@ const registerScenes = (game: Phaser.Game) => {
 	scene.add(SceneKeys.Preload, Preload)
 	scene.add(SceneKeys.TitleScreen, TitleScreen)
 	scene.add(SceneKeys.Game, Game)
+	scene.add(SceneKeys.GameOver, GameOver)
 }
 
 export default registerScenes

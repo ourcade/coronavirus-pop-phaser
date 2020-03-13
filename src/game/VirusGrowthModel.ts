@@ -1,11 +1,11 @@
-import { Subject } from 'rxjs'
+import { Subject, Observable } from 'rxjs'
 
 declare global
 {
 	interface IGrowthModel
 	{
 		getNext(count: number): number
-		onPopulationChanged()
+		onPopulationChanged(): Observable<number>
 		update(dt: number)
 	}
 }
@@ -42,23 +42,76 @@ export default class VirusGrowthModel implements IGrowthModel
 
 	update(dt: number)
 	{
+		if (this.populationCount <= 0)
+		{
+			return
+		}
+
 		this.accumulatedTime += dt
 
-		if (this.accumulatedTime >= 1000)
+		const rate = this.getGrowthRate()
+
+		if (this.accumulatedTime < rate)
 		{
-			this.increasePopulation(1)
-			this.accumulatedTime = this.accumulatedTime - 1000
+			return
 		}
+
+		// increase by 10% of population
+		const increase = this.populationCount * 0.1
+
+		this.increasePopulation(increase)
+		
+		this.accumulatedTime = this.accumulatedTime - rate
+	}
+
+	private getGrowthRate()
+	{
+		if (this.populationCount < 1000)
+		{
+			return 1000
+		}
+
+		if (this.populationCount < 5000)
+		{
+			return 2000
+		}
+
+		if (this.populationCount < 10000)
+		{
+			return 3000
+		}
+
+		if (this.populationCount < 50000)
+		{
+			return 3500
+		}
+
+		if (this.populationCount < 100000)
+		{
+			return 5000
+		}
+
+		return 5500
 	}
 
 	private increasePopulation(amount: number)
 	{
+		if (this.populationCount + amount >= Number.MAX_SAFE_INTEGER)
+		{
+			return
+		}
+
 		this.populationCount += amount
 		this.populationChangedSubject.next(this.populationCount)
 	}
 
 	private decreatePopulation(amount: number)
 	{
+		if (this.populationCount - amount < 0)
+		{
+			amount = this.populationCount
+		}
+
 		this.populationCount -= amount
 		this.populationChangedSubject.next(this.populationCount)
 	}
