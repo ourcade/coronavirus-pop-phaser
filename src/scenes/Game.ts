@@ -114,6 +114,7 @@ export default class Game extends Phaser.Scene
 
 	private handleShutdown()
 	{
+		this.grid?.destroy()
 		this.descentController?.destroy()
 	}
 

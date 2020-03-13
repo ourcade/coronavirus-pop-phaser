@@ -72,6 +72,12 @@ export default class BallGrid
 		this.pool.despawn(sample)
 	}
 
+	destroy()
+	{
+		this.ballsDestroyedSubject.complete()
+		this.ballWillBeDestroyed.complete()
+	}
+
 	setLayoutData(layout: BallLayoutData)
 	{
 		this.layoutData = layout
@@ -389,26 +395,38 @@ export default class BallGrid
 			})
 
 		// move down and fade out
-		const timeline = this.scene.tweens.createTimeline()
-
-		const duration = 700
+		const timeline = this.scene.tweens.timeline()
+		const bottom = this.scene.scale.height * 0.9
 
 		orphans.forEach(orphan => {
+			const y = orphan.y
+			const dy = bottom - y
+			const duration = dy * 0.75
+
 			timeline.add({
 				targets: orphan,
-				y: orphan.y + 1000,
-				alpha: 0,
+				y: y + dy,
 				offset: 0,
-				duration
+				duration,
+				onComplete: function () {
+					// @ts-ignore
+					this.ballWillBeDestroyed.next(orphan)
+					// @ts-ignore
+					this.pool.despawn(orphan)
+				},
+				onCompleteScope: this
 			})
 		})
 
 		timeline.play()
 
 		// NOTE: the onComplete callback doesn't seem to work
-		this.scene.time.delayedCall(duration + 100, () => {
-			orphans.forEach(ball => this.pool.despawn(ball))
-		})
+		// this.scene.time.delayedCall(maxDuration + 100, () => {
+		// 	orphans.forEach(ball => {
+		// 		this.ballWillBeDestroyed.next(ball)
+		// 		this.pool.despawn(ball)
+		// 	})
+		// })
 	}
 
 	private animateAttachBounceAt(row: number, col: number, tx: number, ty: number, newBall: IBall)
