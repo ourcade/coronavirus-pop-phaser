@@ -4,6 +4,7 @@ enum SceneKeys
 	Preload = 'preload',
 	TitleScreen = 'titlescreen',
 	Game = 'game',
+	GameUI = 'game-ui',
 	GameOver = 'game-over'
 }
 

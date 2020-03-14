@@ -1,9 +1,11 @@
-import { Subject, Observable } from 'rxjs'
+import { Observable, BehaviorSubject } from 'rxjs'
 
 declare global
 {
 	interface IGrowthModel
 	{
+		readonly population: number
+
 		getNext(count: number): number
 		onPopulationChanged(): Observable<number>
 		update(dt: number)
@@ -15,11 +17,17 @@ export default class VirusGrowthModel implements IGrowthModel
 	private accumulatedTime = 0
 	private populationCount = 0
 
-	private populationChangedSubject = new Subject<number>()
+	private populationChangedSubject: BehaviorSubject<number>
+
+	get population()
+	{
+		return this.populationCount
+	}
 
 	constructor(initialPopulation = 0)
 	{
 		this.populationCount = initialPopulation
+		this.populationChangedSubject = new BehaviorSubject<number>(initialPopulation)
 	}
 
 	onPopulationChanged()
@@ -57,7 +65,7 @@ export default class VirusGrowthModel implements IGrowthModel
 		}
 
 		// increase by 10% of population
-		const increase = this.populationCount * 0.1
+		const increase = Math.floor(this.populationCount * 0.1)
 
 		this.increasePopulation(increase)
 		

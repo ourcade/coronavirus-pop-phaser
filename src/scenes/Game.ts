@@ -76,6 +76,13 @@ export default class Game extends Phaser.Scene
 			this.handleBallWillBeDestroyed(ball)
 		})
 
+		this.scene.run(SceneKeys.GameUI, {
+			ballsDestroyed: this.grid.onBallsDestroyed(),
+			ballsAdded: this.grid.onBallsAdded(),
+			infectionsChanged: this.growthModel.onPopulationChanged()
+		})
+		this.scene.bringToTop(SceneKeys.GameUI)
+
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
 			winSub.unsubscribe()
 			ballSub.unsubscribe()
@@ -92,6 +99,7 @@ export default class Game extends Phaser.Scene
 
 	private handleGameOver()
 	{
+		this.scene.pause(SceneKeys.Game)
 		this.scene.run(SceneKeys.GameOver)
 	}
 
@@ -116,6 +124,8 @@ export default class Game extends Phaser.Scene
 
 	private handleShutdown()
 	{
+		this.scene.stop(SceneKeys.GameUI)
+
 		this.grid?.destroy()
 		this.descentController?.destroy()
 	}

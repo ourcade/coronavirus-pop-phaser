@@ -30,9 +30,16 @@ export default class BallGrid
 	private size: Phaser.Structs.Size
 
 	private grid: IBallOrNone[][] = []
+	private ballsCount = 0
 
 	private ballsDestroyedSubject = new Subject<number>()
 	private ballWillBeDestroyed = new Subject<IBall>()
+	private ballsAddedSubject = new Subject<number>()
+
+	get totalBalls()
+	{
+		return this.ballsCount
+	}
 
 	get height()
 	{
@@ -93,6 +100,11 @@ export default class BallGrid
 	onBallWillBeDestroyed()
 	{
 		return this.ballWillBeDestroyed.asObservable()
+	}
+
+	onBallsAdded()
+	{
+		return this.ballsAddedSubject.asObservable()
 	}
 
 	/**
@@ -183,6 +195,8 @@ export default class BallGrid
 		// minimum 3 matches required
 		if (matches.length < 3)
 		{
+			this.ballsCount += 1
+			this.ballsAddedSubject.next(1)
 			this.animateAttachBounceAt(bRow, bCol, tx, ty, newBall)
 			return
 		}
@@ -223,7 +237,9 @@ export default class BallGrid
 
 		this.cleanUpEmptyRows()
 
-		this.ballsDestroyedSubject.next(matches.length + orphans.length)
+		const destroyedCount = matches.length + orphans.length
+		this.ballsDestroyedSubject.next(destroyedCount)
+		this.ballsCount -= destroyedCount
 	}
 
 	generate(rows = 6)
@@ -278,6 +294,9 @@ export default class BallGrid
 		}
 
 		this.addRowToFront(row)
+
+		this.ballsCount += count
+		this.ballsAddedSubject.next(count)
 
 		return row.length
 	}
@@ -355,12 +374,6 @@ export default class BallGrid
 			// pad end with space for offset
 			gridRow.push(undefined)
 		}
-	}
-
-	private destroyMatches(matches: IGridPosition[])
-	{
-		this.removeFromGrid(matches)
-			.forEach(ball => this.pool.despawn(ball))
 	}
 
 	private removeFromGrid(matches: IGridPosition[])

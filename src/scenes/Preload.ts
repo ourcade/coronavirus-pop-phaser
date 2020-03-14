@@ -10,7 +10,8 @@ export default class Preload extends Phaser.Scene
 	{
 		const fonts = new WebFontFile(this.load, [
 			'Nosifer',
-			'Lemon'
+			'Lemon',
+			'Righteous'
 		])
 
 		this.load.addFile(fonts)

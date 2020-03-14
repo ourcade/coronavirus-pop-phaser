@@ -50,6 +50,7 @@ export default class DescentController
 	destroy()
 	{
 		this.subscriptions.forEach(sub => sub.unsubscribe())
+		this.subscriptions.length = 0
 	}
 
 	setStartingDescent(dy: number)
@@ -117,8 +118,6 @@ export default class DescentController
 	private handleVirusPopulationChanged(count: number)
 	{
 		const s = Math.max(0.3, Math.log(count * .0004))
-		this.speed = s > 1.5 ? 1.5 : s
-
-		console.dir(this.speed)
+		this.speed = s > 1.1 ? 1.1 : s
 	}
 }
