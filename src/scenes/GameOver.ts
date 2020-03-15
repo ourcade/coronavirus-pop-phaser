@@ -4,9 +4,22 @@ import { DarkColor } from '~/consts/Colors'
 
 import button, { primaryButton } from '~/ui/Buttons'
 import SceneKeys from '~/consts/SceneKeys'
+import SoundEffectsController from '~/game/SoundEffectsController'
+import { Subject } from 'rxjs'
 
 export default class GameOver extends Phaser.Scene
 {
+	private sfx?: SoundEffectsController
+	private uiClickSubject = new Subject<void>()
+	private enterSubject = new Subject<void>()
+
+	init()
+	{
+		this.sfx = new SoundEffectsController(this.sound)
+		this.sfx.handleUIClick(this.uiClickSubject.asObservable())
+		this.sfx.handleGameOverEnter(this.enterSubject.asObservable())
+	}
+
 	create()
 	{
 		const width = this.scale.width
@@ -32,6 +45,8 @@ export default class GameOver extends Phaser.Scene
 		const tryAgainBtn = this.add.dom(x, height * 0.6, primaryButton('Try Again'))
 			.setScale(0, 0)
 			.addListener('click').on('click', () => {
+				this.uiClickSubject.next()
+
 				this.scene.stop(SceneKeys.Game)
 				this.scene.start(SceneKeys.Game)
 			})
@@ -39,6 +54,8 @@ export default class GameOver extends Phaser.Scene
 		const exitBtn = this.add.dom(x, tryAgainBtn.y + tryAgainBtn.height + 20, button('Back'))
 			.setScale(0, 0)
 			.addListener('click').on('click', () => {
+				this.uiClickSubject.next()
+
 				this.scene.stop(SceneKeys.Game)
 				this.scene.start(SceneKeys.TitleScreen)
 			})
@@ -67,5 +84,11 @@ export default class GameOver extends Phaser.Scene
 		})
 
 		timeline.play()
+
+		this.enterSubject.next()
+
+		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+			this.sfx?.destroy()
+		})
 	}
 }

@@ -20,6 +20,17 @@ export default class SoundEffectsController
 		this.subscriptions.length = 0
 	}
 
+	handleShootBall(onShoot: Observable<IBall>)
+	{
+		const sub = onShoot.subscribe(ball => {
+			this.sound.play(AudioKeys.ShootBall, {
+				volume: 0.3
+			})
+		})
+
+		this.subscriptions.push(sub)
+	}
+
 	handleBallAttached(attached: Observable<IBall>)
 	{
 		const sub = attached.subscribe(ball => {
@@ -56,6 +67,26 @@ export default class SoundEffectsController
 				volume: 0.2
 			})
 		}, 10))
+
+		this.subscriptions.push(sub)
+	}
+
+	handleGameOverEnter(gameOverEnter: Observable<void>)
+	{
+		const sub = gameOverEnter.subscribe(() => {
+			this.sound.play(AudioKeys.GameOverFoley)
+		})
+
+		this.subscriptions.push(sub)
+	}
+
+	handleUIClick(uiClick: Observable<void>)
+	{
+		const sub = uiClick.subscribe(() => {
+			this.sound.play(AudioKeys.UIClick, {
+				volume: 0.5
+			})
+		})
 
 		this.subscriptions.push(sub)
 	}

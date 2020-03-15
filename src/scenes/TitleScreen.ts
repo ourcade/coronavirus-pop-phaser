@@ -3,10 +3,20 @@ import Phaser from 'phaser'
 import playButton from '~/ui/PlayButton'
 import { DarkColor } from '~/consts/Colors'
 import SceneKeys from '~/consts/SceneKeys'
-import AudioKeys from '~/consts/AudioKeys'
+import SoundEffectsController from '~/game/SoundEffectsController'
+import { Subject } from 'rxjs'
 
 export default class HelloWorldScene extends Phaser.Scene
 {
+	private sfx?: SoundEffectsController
+	private uiClickSubject = new Subject<void>()
+
+	init()
+	{
+		this.sfx = new SoundEffectsController(this.sound)
+		this.sfx.handleUIClick(this.uiClickSubject.asObservable())
+	}
+
     create()
     {
 		const width = this.scale.width
@@ -37,7 +47,13 @@ export default class HelloWorldScene extends Phaser.Scene
 
 		this.add.dom(x, height * 0.7, playButton('Play'))
 			.addListener('click').on('click', () => {
+				this.uiClickSubject.next()
+
 				this.scene.start(SceneKeys.Game)
 			})
+
+		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+			this.sfx?.destroy()
+		})
     }
 }

@@ -3,6 +3,7 @@ import Phaser from 'phaser'
 import { OrangeColor } from '~/consts/Colors'
 
 import IShotGuide from '~/types/IShotGuide'
+import { Subject, Observable } from 'rxjs'
 
 const DPR = window.devicePixelRatio
 const RADIUS = 100 * DPR
@@ -12,6 +13,8 @@ declare global
 	interface IShooter extends Phaser.GameObjects.Container
 	{
 		readonly radius: number
+
+		onShoot(): Observable<IBall>
 
 		setBallPool(pool: IBallPool)
 		setGuide(guide: IShotGuide)
@@ -27,6 +30,8 @@ export default class Shooter extends Phaser.GameObjects.Container implements ISh
 	private ball?: IBall
 	private ballPool?: IBallPool
 	private shotGuide?: IShotGuide
+
+	private shootSubject = new Subject<IBall>()
 
 	get radius()
 	{
@@ -51,6 +56,11 @@ export default class Shooter extends Phaser.GameObjects.Container implements ISh
 		this.scene.input.removeListener(Phaser.Input.Events.POINTER_UP, this.handlePointerUp, this)
 
 		super.preDestroy()
+	}
+
+	onShoot()
+	{
+		return this.shootSubject.asObservable()
 	}
 
 	setBallPool(pool: IBallPool)
@@ -140,6 +150,8 @@ export default class Shooter extends Phaser.GameObjects.Container implements ISh
 		vec.normalize()
 
 		this.ball.launch(vec)
+
+		this.shootSubject.next(this.ball)
 
 		this.ball = undefined
 

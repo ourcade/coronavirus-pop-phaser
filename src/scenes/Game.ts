@@ -67,6 +67,7 @@ export default class Game extends Phaser.Scene
 		this.descentController = new DescentController(this, this.grid, this.growthModel)
 		this.descentController.setStartingDescent(300)
 
+		this.sfx?.handleShootBall(this.shooter.onShoot())
 		this.sfx?.handleBallAttached(this.grid.onBallAttached())
 		this.sfx?.handleClearMatches(this.grid.onBallsDestroyed())
 		this.sfx?.handleClearOrphan(this.grid.onOrphanWillBeDestroyed())
