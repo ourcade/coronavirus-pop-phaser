@@ -24,7 +24,7 @@ npm run start
 
 Music loop is [Imminent Threat by Matthew Pablo](https://opengameart.org/content/imminent-threat)
 
-Sound effects from [Digital Audio pack by Kenney.nl](https://kenney.nl/assets/digital-audio)
+Sound effects from [Digital Audio](https://kenney.nl/assets/digital-audio) and [Interface Sounds](https://kenney.nl/assets/interface-sounds) packs by Kenney.nl
 
 ## License
 
