@@ -20,6 +20,12 @@ npm install
 npm run start
 ```
 
+## Credits
+
+Music loop is [Imminent Threat by Matthew Pablo](https://opengameart.org/content/imminent-threat)
+
+Sound effects from [Digital Audio pack by Kenney.nl](https://kenney.nl/assets/digital-audio)
+
 ## License
 
 [MIT License](https://github.com/ourcade/coronavirus-pop-phaser3/blob/master/LICENSE)
