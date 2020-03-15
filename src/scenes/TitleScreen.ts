@@ -3,14 +3,10 @@ import Phaser from 'phaser'
 import playButton from '~/ui/PlayButton'
 import { DarkColor } from '~/consts/Colors'
 import SceneKeys from '~/consts/SceneKeys'
+import AudioKeys from '~/consts/AudioKeys'
 
 export default class HelloWorldScene extends Phaser.Scene
 {
-	preload()
-    {
-        
-    }
-
     create()
     {
 		const width = this.scale.width

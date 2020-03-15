@@ -34,7 +34,9 @@ export default class BallGrid
 
 	private ballsDestroyedSubject = new Subject<number>()
 	private ballWillBeDestroyed = new Subject<IBall>()
+	private orphanWillBeDestroyed = new Subject<IBall>()
 	private ballsAddedSubject = new Subject<number>()
+	private ballAttachedSubject = new Subject<IBall>()
 
 	get totalBalls()
 	{
@@ -102,9 +104,19 @@ export default class BallGrid
 		return this.ballWillBeDestroyed.asObservable()
 	}
 
+	onOrphanWillBeDestroyed()
+	{
+		return this.orphanWillBeDestroyed.asObservable()
+	}
+
 	onBallsAdded()
 	{
 		return this.ballsAddedSubject.asObservable()
+	}
+
+	onBallAttached()
+	{
+		return this.ballAttachedSubject.asObservable()
 	}
 
 	/**
@@ -197,6 +209,7 @@ export default class BallGrid
 		{
 			this.ballsCount += 1
 			this.ballsAddedSubject.next(1)
+			this.ballAttachedSubject.next(newBall)
 			this.animateAttachBounceAt(bRow, bCol, tx, ty, newBall)
 			return
 		}
@@ -424,6 +437,8 @@ export default class BallGrid
 				onComplete: function () {
 					// @ts-ignore
 					this.ballWillBeDestroyed.next(orphan)
+					// @ts-ignore
+					this.orphanWillBeDestroyed.next(orphan)
 					// @ts-ignore
 					this.pool.despawn(orphan)
 				},

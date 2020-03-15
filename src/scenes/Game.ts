@@ -11,6 +11,7 @@ import VirusGrowthModel from '~/game/VirusGrowthModel'
 import DescentController from '~/game/DescentController'
 import SceneKeys from '~/consts/SceneKeys'
 import ShotGuide from '~/game/guides/ShotGuide'
+import SoundEffectsController from '~/game/SoundEffectsController'
 
 const DPR = window.devicePixelRatio
 
@@ -28,6 +29,7 @@ export default class Game extends Phaser.Scene
 
 	private growthModel!: IGrowthModel
 	private descentController?: DescentController
+	private sfx?: SoundEffectsController
 
 	private state = GameState.Playing
 
@@ -35,6 +37,8 @@ export default class Game extends Phaser.Scene
 	{
 		this.state = GameState.Playing
 		this.growthModel = new VirusGrowthModel(100)
+
+		this.sfx = new SoundEffectsController(this.sound)
 	}
 
 	create()
@@ -62,6 +66,10 @@ export default class Game extends Phaser.Scene
 
 		this.descentController = new DescentController(this, this.grid, this.growthModel)
 		this.descentController.setStartingDescent(300)
+
+		this.sfx?.handleBallAttached(this.grid.onBallAttached())
+		this.sfx?.handleClearMatches(this.grid.onBallsDestroyed())
+		this.sfx?.handleClearOrphan(this.grid.onOrphanWillBeDestroyed())
 
 		const winSub = this.growthModel.onPopulationChanged().subscribe(count => {
 			if (count > 0)
@@ -128,6 +136,7 @@ export default class Game extends Phaser.Scene
 
 		this.grid?.destroy()
 		this.descentController?.destroy()
+		this.sfx?.destroy()
 	}
 
 	private processBallHitGrid(ball: Phaser.GameObjects.GameObject, gridBall: Phaser.GameObjects.GameObject)
