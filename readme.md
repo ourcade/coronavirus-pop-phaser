@@ -1,5 +1,5 @@
-# Coronavirus Pop!
-> Defeat the coronavirus in a bubble shooter game created with Phaser 3
+# Coronavirus Pop! Template
+> Defeat the coronavirus in a bubble shooter game template created with Phaser 3
 
 ![License](https://img.shields.io/badge/license-MIT-green)
 
