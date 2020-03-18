@@ -2,23 +2,20 @@ import Phaser from 'phaser'
 
 import TextureKeys from '~/consts/TextureKeys'
 import GameEvents from '~/consts/GameEvents'
-import WebFontFile from '~/ui/WebFontFile'
 import AudioKeys from '~/consts/AudioKeys'
 
 export default class Preload extends Phaser.Scene
 {
 	preload()
 	{
-		const fonts = new WebFontFile(this.load, [
-			'Nosifer',
-			'Lemon',
-			'Righteous'
-		])
-
-		this.load.addFile(fonts)
-
+		this.load.image(TextureKeys.Background, 'assets/game/background.png')
 		this.load.image(TextureKeys.Virus, 'assets/game/coronavirus.png')
+		this.load.image(TextureKeys.VirusRed, 'assets/game/virus_red.png')
+		this.load.image(TextureKeys.VirusGreen, 'assets/game/virus_green.png')
+		this.load.image(TextureKeys.VirusBlue, 'assets/game/virus_blue.png')
+		this.load.image(TextureKeys.VirusYellow, 'assets/game/virus_yellow.png')
 		this.load.image(TextureKeys.VirusParticles, 'assets/game/light_02.png')
+		this.load.image(TextureKeys.Shooter, 'assets/game/shooter.png')
 
 		this.load.audio(AudioKeys.MusicLoop, 'assets/game/music/imminent-threat-loop-var.wav')
 

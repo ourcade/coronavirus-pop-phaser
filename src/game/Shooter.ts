@@ -1,12 +1,14 @@
 import Phaser from 'phaser'
 
-import { OrangeColor } from '~/consts/Colors'
-
 import IShotGuide from '~/types/IShotGuide'
 import { Subject, Observable } from 'rxjs'
+import TextureKeys from '~/consts/TextureKeys'
 
 const DPR = window.devicePixelRatio
 const RADIUS = 100 * DPR
+
+const HALF_PI = Math.PI * 0.5
+const GAP = 5 * DPR
 
 declare global
 {
@@ -42,7 +44,7 @@ export default class Shooter extends Phaser.GameObjects.Container implements ISh
 	{
 		super(scene, x, y)
 
-		const base = scene.add.circle(0, 0, RADIUS, OrangeColor, 1)
+		const base = scene.add.image(0, 0, TextureKeys.Shooter)
 
 		this.add(base)
 
@@ -88,9 +90,13 @@ export default class Shooter extends Phaser.GameObjects.Container implements ISh
 		this.ball = ball
 		this.ball.disableBody()
 
-		// 5 is gap
-		this.ball.x = this.x
-		this.ball.y = this.y - RADIUS - (this.ball.height * 0.5) - (5 * DPR)
+		const vec = new Phaser.Math.Vector2(0, 0)
+		vec.setToPolar(this.rotation + HALF_PI)
+
+		const ballRadius = this.ball.radius
+
+		this.ball.x = this.x - (vec.x * (RADIUS + ballRadius + GAP))
+		this.ball.y = this.y - (vec.y * (RADIUS + ballRadius + GAP))
 	}
 
 	returnBall(ball: IBall)
@@ -121,14 +127,16 @@ export default class Shooter extends Phaser.GameObjects.Container implements ISh
 		const vec = new Phaser.Math.Vector2(dx, dy)
 		vec.normalize()
 
+		const rotation = vec.angle()
+		this.rotation = rotation + HALF_PI
+
 		const ballRadius = this.ball.radius
 		const physicsRadius = this.ball.physicsRadius
-		const gap = 5 * DPR
 
-		this.ball.x = this.x + (vec.x * (RADIUS + ballRadius + gap))
-		this.ball.y = this.y + (vec.y * (RADIUS + ballRadius + gap))
+		this.ball.x = this.x + (vec.x * (RADIUS + ballRadius + GAP))
+		this.ball.y = this.y + (vec.y * (RADIUS + ballRadius + GAP))
 
-		this.shotGuide?.showFrom(this.ball.x, this.ball.y, vec, physicsRadius)
+		this.shotGuide?.showFrom(this.ball.x, this.ball.y, vec, physicsRadius, this.ball.color)
 	}
 
 	private handlePointerDown()

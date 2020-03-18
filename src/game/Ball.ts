@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import BallColor from './BallColor'
+import TextureKeys from '~/consts/TextureKeys'
 
 const ALL_COLORS = [
 	BallColor.Red,
@@ -58,7 +59,24 @@ export default class Ball extends Phaser.Physics.Arcade.Sprite implements IBall
 	setColor(color: BallColor)
 	{
 		this._color = color
-		this.tint = color
+		switch (color)
+		{
+			case BallColor.Red:
+				this.setTexture(TextureKeys.VirusRed)
+				break
+
+			case BallColor.Green:
+				this.setTexture(TextureKeys.VirusGreen)
+				break
+
+			case BallColor.Blue:
+				this.setTexture(TextureKeys.VirusBlue)
+				break
+
+			case BallColor.Yellow:
+				this.setTexture(TextureKeys.VirusYellow)
+				break
+		}
 
 		return this
 	}

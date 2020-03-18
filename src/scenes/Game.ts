@@ -46,6 +46,10 @@ export default class Game extends Phaser.Scene
 		const width = this.scale.width
 		const height = this.scale.height
 
+		this.add.image(width * 0.5, height * 0.5, TextureKeys.Background)
+			.setScale(DPR)
+			.setTint(0x353535FF)
+
 		this.physics.world.setBounds(0, 0, width, height)
 		this.physics.world.setBoundsCollision(true, true, false, false)
 

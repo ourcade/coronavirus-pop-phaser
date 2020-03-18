@@ -29,7 +29,7 @@ export default class ShotGuide implements IShotGuide
 		})
 	}
 
-	showFrom(x: number, y: number, direction: Phaser.Math.Vector2, radius: number)
+	showFrom(x: number, y: number, direction: Phaser.Math.Vector2, radius: number, color: number = LightColor)
 	{
 		const width = this.scene.scale.width
 		const count = 9
@@ -41,6 +41,7 @@ export default class ShotGuide implements IShotGuide
 				const guide = this.group.get(0, 0) as GuideCricle
 				guide.setActive(true)
 				guide.setVisible(true)
+				guide.fillColor = color
 				this.guides.push(guide)
 			}
 		}

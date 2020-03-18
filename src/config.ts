@@ -1,7 +1,5 @@
-import { BackgroundColor } from '~/consts/Colors'
+import { DarkColor } from '~/consts/Colors'
 import ElementKeys from '~/consts/ElementKeys'
-
-const DPR = window.devicePixelRatio
 
 const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,
@@ -9,7 +7,7 @@ const config: Phaser.Types.Core.GameConfig = {
 	dom: {
 		createContainer: true
 	},
-	backgroundColor: BackgroundColor,
+	backgroundColor: DarkColor,
 	physics: {
 		default: 'arcade',
 		arcade: {

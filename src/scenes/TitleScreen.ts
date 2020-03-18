@@ -5,6 +5,9 @@ import { DarkColor } from '~/consts/Colors'
 import SceneKeys from '~/consts/SceneKeys'
 import SoundEffectsController from '~/game/SoundEffectsController'
 import { Subject } from 'rxjs'
+import TextureKeys from '~/consts/TextureKeys'
+
+const DPR = window.devicePixelRatio
 
 export default class HelloWorldScene extends Phaser.Scene
 {
@@ -24,6 +27,10 @@ export default class HelloWorldScene extends Phaser.Scene
 
 		const x = width * 0.5
 		const y = height * 0.3
+
+		this.add.image(x, height * 0.5, TextureKeys.Background)
+			.setScale(DPR)
+			.setTint(0x000000FF)
 
 		const fontSize = Math.min(width * 0.095, 225)
         const title1 = this.add.text(x, y, 'Coronavirus', {

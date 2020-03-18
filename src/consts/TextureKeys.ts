@@ -1,7 +1,13 @@
 enum TextureKeys
 {
+	Background = 'background',
 	Virus = 'virus',
-	VirusParticles = 'virus-particles'
+	VirusRed = 'virus-red',
+	VirusGreen = 'virus-green',
+	VirusBlue = 'virus-blue',
+	VirusYellow = 'virus-yellow',
+	VirusParticles = 'virus-particles',
+	Shooter = 'shooter'
 }
 
 export default TextureKeys
