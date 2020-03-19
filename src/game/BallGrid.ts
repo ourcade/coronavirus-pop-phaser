@@ -6,6 +6,7 @@ import BallLayoutData, {
 
 import BallColor, { colorIsMatch } from './BallColor'
 import { Subject } from 'rxjs'
+import BallState from '~/consts/BallState'
 
 interface IGridPosition
 {
@@ -220,6 +221,16 @@ export default class BallGrid
 		// processes that add new rows can run normally
 		const matchedBalls = this.removeFromGrid(matches)
 
+		const orphanPositions = this.findOrphanedBalls()
+		const orphans = this.removeFromGrid(orphanPositions)
+			.map(ball => {
+				ball.setActive(false)
+				this.scene.physics.world.remove(ball.body)
+				return ball
+			})
+
+		this.cleanUpEmptyRows()
+
 		await new Promise(resolve => {
 			this.scene.tweens.add({
 				targets: newBall,
@@ -242,17 +253,14 @@ export default class BallGrid
 			this.pool.despawn(ball)
 		})
 
-		const orphans = this.findOrphanedBalls()
-		if (orphans.length > 0)
-		{
-			this.animateOrphans(orphans)
-		}
-
-		this.cleanUpEmptyRows()
-
 		const destroyedCount = matches.length + orphans.length
 		this.ballsDestroyedSubject.next(destroyedCount)
 		this.ballsCount -= destroyedCount
+
+		if (orphans.length > 0)
+		{
+			await this.animateOrphans(orphans)
+		}
 	}
 
 	generate(rows = 6)
@@ -412,41 +420,41 @@ export default class BallGrid
 		return balls
 	}
 
-	private animateOrphans(orphanPositions: IGridPosition[])
+	private async animateOrphans(orphans: IBall[])
 	{
-		const orphans = this.removeFromGrid(orphanPositions)
-			.map(ball => {
-				this.scene.physics.world.remove(ball.body)
-				return ball
-			})
-
 		// move down and fade out
 		const timeline = this.scene.tweens.timeline()
 		const bottom = this.scene.scale.height * 0.9
 
-		orphans.forEach(orphan => {
+		const tasks = orphans.map(orphan => {
 			const y = orphan.y
 			const dy = bottom - y
 			const duration = dy * 0.75
 
-			timeline.add({
-				targets: orphan,
-				y: y + dy,
-				offset: 0,
-				duration,
-				onComplete: function () {
-					// @ts-ignore
-					this.ballWillBeDestroyed.next(orphan)
-					// @ts-ignore
-					this.orphanWillBeDestroyed.next(orphan)
-					// @ts-ignore
-					this.pool.despawn(orphan)
-				},
-				onCompleteScope: this
+			return new Promise(resolve => {
+				timeline.add({
+					targets: orphan,
+					y: y + dy,
+					offset: 0,
+					duration,
+					onComplete: function () {
+						// @ts-ignore
+						this.ballWillBeDestroyed.next(orphan)
+						// @ts-ignore
+						this.orphanWillBeDestroyed.next(orphan)
+						// @ts-ignore
+						this.pool.despawn(orphan)
+
+						resolve()
+					},
+					onCompleteScope: this
+				})
 			})
 		})
 
 		timeline.play()
+
+		await Promise.all(tasks)
 	}
 
 	private animateAttachBounceAt(row: number, col: number, tx: number, ty: number, newBall: IBall)

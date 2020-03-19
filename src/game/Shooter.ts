@@ -82,6 +82,11 @@ export default class Shooter extends Phaser.GameObjects.Container implements ISh
 			return
 		}
 
+		if (!ball && this.ball)
+		{
+			return
+		}
+
 		if (!ball)
 		{
 			ball = this.ballPool.spawn(0, 0)
@@ -117,9 +122,6 @@ export default class Shooter extends Phaser.GameObjects.Container implements ISh
 		{
 			return
 		}
-
-		// const dx = (pointer.isDown ? pointer.downX : pointer.x) - this.x
-		// const dy = (pointer.isDown ? pointer.downY : pointer.y) - this.y
 
 		const dx = pointer.x - this.x
 		const dy = pointer.y - this.y

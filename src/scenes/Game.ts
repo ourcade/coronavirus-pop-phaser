@@ -151,7 +151,9 @@ export default class Game extends Phaser.Scene
 		const b = ball as IBall
 		const gb = gridBall as IBall
 
-		if (!b.active || !gb.active)
+		const active = b.active && gb.active
+
+		if (!active)
 		{
 			return false
 		}
@@ -163,7 +165,7 @@ export default class Game extends Phaser.Scene
 		return distanceSq <= mdSq
 	}
 
-	private handleBallHitGrid(ball: Phaser.GameObjects.GameObject, gridBall: Phaser.GameObjects.GameObject)
+	private async handleBallHitGrid(ball: Phaser.GameObjects.GameObject, gridBall: Phaser.GameObjects.GameObject)
 	{
 		const b = ball as IBall
 		const bx = b.x
@@ -188,9 +190,16 @@ export default class Game extends Phaser.Scene
 		const y = gy + (directionToGrid.y * gb.width)
 
 		this.shooter?.returnBall(b)
+
+		this.descentController?.hold()
+
+		await this.grid?.attachBall(x, y, color, gb, vx, vy)
+
+		await this.descentController?.reversing()
+
 		this.shooter?.attachBall()
 
-		this.grid?.attachBall(x, y, color, gb, vx, vy)
+		this.descentController?.descend()
 	}
 
 	update(t, dt)

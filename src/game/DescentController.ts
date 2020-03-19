@@ -1,5 +1,5 @@
 import BallGrid from './BallGrid'
-import { SubscriptionLike } from 'rxjs'
+import { SubscriptionLike, Subject, Observable } from 'rxjs'
 
 enum DescentState
 {
@@ -19,6 +19,8 @@ export default class DescentController
 	private state = DescentState.Descending
 
 	private subscriptions: SubscriptionLike[] = []
+
+	private reversingSubject = new Subject<void>()
 
 	get yPosition()
 	{
@@ -58,6 +60,30 @@ export default class DescentController
 		this.ballGrid.moveBy(dy)
 	}
 
+	hold()
+	{
+		this.state = DescentState.Holding
+	}
+
+	descend()
+	{
+		this.state = DescentState.Descending
+	}
+
+	reversing()
+	{
+		if (this.state !== DescentState.Reversing)
+		{
+			return new Promise(resolve => {
+				resolve()
+			})
+		}
+
+		return new Promise(resolve => {
+			this.reversingSubject.asObservable().subscribe(resolve)
+		})
+	}
+
 	update(dt: number)
 	{
 		switch (this.state)
@@ -78,7 +104,6 @@ export default class DescentController
 				break
 
 			case DescentState.Holding:
-				// potential for future use like powerups
 				break
 		}
 	}
@@ -108,8 +133,16 @@ export default class DescentController
 			},
 			onUpdateScope: this,
 			onComplete: function () {
+				// if state is no longer Reversing then don't change
 				// @ts-ignore
-				this.state = DescentState.Descending
+				if (this.state === DescentState.Reversing)
+				{
+					// @ts-ignore
+					this.state = DescentState.Descending
+				}
+
+				// @ts-ignore
+				this.reversingSubject.next()
 			},
 			onCompleteScope: this
 		})
