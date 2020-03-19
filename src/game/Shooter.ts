@@ -102,6 +102,15 @@ export default class Shooter extends Phaser.GameObjects.Container implements ISh
 
 		this.ball.x = this.x - (vec.x * (RADIUS + ballRadius + GAP))
 		this.ball.y = this.y - (vec.y * (RADIUS + ballRadius + GAP))
+
+		this.ball.scale = 0
+
+		this.scene.add.tween({
+			targets: this.ball,
+			scale: 1,
+			ease: 'Bounce.easeOut',
+			duration: 300
+		})
 	}
 
 	returnBall(ball: IBall)
