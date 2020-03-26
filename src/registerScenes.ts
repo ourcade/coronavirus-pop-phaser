@@ -7,6 +7,8 @@ import Game from './scenes/Game'
 import GameUI from './scenes/GameUI'
 import GameOver from './scenes/GameOver'
 
+import TipsInterstitial from './scenes/TipsInterstitial'
+
 const registerScenes = (game: Phaser.Game) => {
 	const scene = game.scene
 	scene.add(SceneKeys.Bootstrap, Bootstrap)
@@ -15,6 +17,8 @@ const registerScenes = (game: Phaser.Game) => {
 	scene.add(SceneKeys.Game, Game)
 	scene.add(SceneKeys.GameUI, GameUI)
 	scene.add(SceneKeys.GameOver, GameOver)
+
+	scene.add(SceneKeys.TipsInterstitial, TipsInterstitial)
 }
 
 export default registerScenes

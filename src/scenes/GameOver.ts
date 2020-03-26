@@ -1,4 +1,4 @@
-import Phaser, { Tilemaps } from 'phaser'
+import Phaser, { Tilemaps, Scene } from 'phaser'
 
 import { DarkColor } from '~/consts/Colors'
 
@@ -48,7 +48,9 @@ export default class GameOver extends Phaser.Scene
 				this.uiClickSubject.next()
 
 				this.scene.stop(SceneKeys.Game)
-				this.scene.start(SceneKeys.Game)
+				this.scene.start(SceneKeys.TipsInterstitial, {
+					target: SceneKeys.Game
+				})
 			})
 
 		const exitBtn = this.add.dom(x, tryAgainBtn.y + tryAgainBtn.height + 20, button('Back'))
@@ -57,7 +59,10 @@ export default class GameOver extends Phaser.Scene
 				this.uiClickSubject.next()
 
 				this.scene.stop(SceneKeys.Game)
-				this.scene.start(SceneKeys.TitleScreen)
+
+				this.scene.start(SceneKeys.TipsInterstitial, {
+					target: SceneKeys.TitleScreen
+				})
 			})
 
 		const timeline = this.tweens.timeline()

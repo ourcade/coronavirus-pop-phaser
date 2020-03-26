@@ -56,7 +56,10 @@ export default class HelloWorldScene extends Phaser.Scene
 			.addListener('click').on('click', () => {
 				this.uiClickSubject.next()
 
-				this.scene.start(SceneKeys.Game)
+				// this.scene.start(SceneKeys.Game)
+				this.scene.start(SceneKeys.TipsInterstitial, {
+					target: SceneKeys.Game
+				})
 			})
 
 		this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {

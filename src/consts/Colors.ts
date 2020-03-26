@@ -7,6 +7,7 @@ const OrangeColor = 0xEF7D3C
 
 const DarkColor = 0x1c1c1c
 const LightColor = 0xe0e0e0
+const WhiteColor = 0xfcfcfc
 
 export {
 	PrimaryColor,
@@ -17,5 +18,6 @@ export {
 	OrangeColor,
 
 	DarkColor,
-	LightColor
+	LightColor,
+	WhiteColor
 }
