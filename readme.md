@@ -13,12 +13,16 @@ This is a Bubble Shooter template in Phaser 3 built with TypeScript. Substitute 
 
 ## Getting Started
 
-Clone this repository and run:
+Clone this repository with `git-lfs` and run:
 
 ```bash
 npm install
 npm run start
 ```
+
+If you don't have `git-lfs` installed then get it here: https://git-lfs.github.com
+
+All the image and audio files in this repository is stored with `git-lfs`. Alternatively you can download a zip instead.
 
 ## Credits
 
